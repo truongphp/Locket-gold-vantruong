@@ -982,6 +982,96 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 8px;
     }
+    .cap-inline-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      width: 190px;
+      max-width: 66vw;
+      text-align: center;
+      font-family: inherit;
+    }
+    .cap-inline-input::placeholder { color: rgba(255,255,255,0.75); }
+    .cap-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin: -4px 0 2px;
+    }
+    .cap-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.25);
+      cursor: pointer;
+      transition: all 0.16s var(--spring);
+    }
+    .cap-dot.active {
+      width: 16px;
+      background: #fff;
+    }
+    .cap-pills-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 2px 0;
+    }
+    .preset-pill {
+      padding: 8px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      white-space: nowrap;
+      max-width: 100%;
+    }
+    .music-track-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .music-track-row:active { transform: scale(0.98); }
+    .shutter-btn.recording {
+      border-color: var(--danger);
+      box-shadow: 0 0 28px rgba(255, 69, 58, 0.55);
+      transform: scale(1.08);
+    }
+    .shutter-btn.recording .shutter-inner {
+      background: var(--danger);
+      transform: scale(0.55);
+      border-radius: 10px;
+    }
+    .rec-timer-pill {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 8;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(255, 69, 58, 0.9);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+    .rec-timer-pill.show { display: inline-flex; }
 
     /* Toast */
     .toast-box {
@@ -1121,6 +1211,7 @@
               </div>
             </div>
 
+            <div id="recTimerPill" class="rec-timer-pill">● <span id="recTimerText">00:00 / 01:00</span></div>
             <div id="camCountdown" class="cam-countdown">3</div>
             <div id="camProcessing" class="cam-processing">
               <div class="processing-pill">
@@ -1170,7 +1261,7 @@
             </button>
           </div>
 
-          <div class="send-preview-box">
+          <div id="sendPreviewBox" class="send-preview-box">
             <img id="sendPreviewImg" alt="preview" style="display:none;" />
             <video id="sendPreviewVid" controls playsinline style="display:none;"></video>
             <div id="sendProcessing" class="cam-processing">
@@ -1179,11 +1270,13 @@
                 <span id="sendProcessingText">ĐANG RỬA ẢNH...</span>
               </div>
             </div>
-            <button id="btnOpenCaptionSheet" class="caption-pill-overlay">
+            <div id="captionPillBox" class="caption-pill-overlay">
               <span id="capPillIcon"></span>
-              <span id="capPillText">Thêm một tin nhắn</span>
-            </button>
+              <input id="capInlineInput" class="cap-inline-input" type="text" placeholder="Thêm một tin nhắn" />
+            </div>
           </div>
+
+          <div id="capDotsRow" class="cap-dots"></div>
 
           <!-- Action Row -->
           <div class="send-actions-row">
@@ -1193,10 +1286,15 @@
             <button id="btnPublishLocket" class="send-circle-btn" title="Đăng lên Locket">
               <svg class="ico" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
             </button>
-            <button id="btnAiWash" class="ai-wash-pill" title="Rửa ảnh AI">
-              <svg class="ico" style="width:15px;height:15px;" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
-              <span id="aiQuotaBadge">2/2</span>
-            </button>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button id="btnOpenCaptionSheet" class="glass-circle" title="Chọn mẫu Chú thích & Nhạc">
+                <svg class="ico" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+              </button>
+              <button id="btnAiWash" class="ai-wash-pill" title="Rửa ảnh AI">
+                <span>AI</span>
+                <span id="aiQuotaBadge">2/2</span>
+              </button>
+            </div>
           </div>
 
           <div id="friendsStrip" class="friends-strip"></div>
@@ -1315,18 +1413,21 @@
     </div>
   </div>
 
-  <!-- BOTTOM SHEET: CAPTION STUDIO -->
+  <!-- BOTTOM SHEET: CAPTION & MUSIC STUDIO -->
   <div id="captionSheet" class="sheet-backdrop">
     <div class="sheet-panel">
       <div class="sheet-handle"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:16px;font-weight:800;">Chú thích</span>
-        <button id="btnCloseCaptionSheet" class="btn-primary" style="width:auto;padding:8px 18px;font-size:13px;">Áp dụng</button>
+        <span style="font-size:16px;font-weight:800;">Chú thích & Nhạc</span>
+        <button id="btnCloseCaptionSheet" class="btn-primary" style="width:auto;padding:8px 18px;font-size:13px;">Xong</button>
       </div>
+      <!-- Music Search + Random -->
       <div style="display:flex;gap:6px;align-items:center;">
-        <input id="musicLinkInput" class="field-input" style="flex:1;padding:9px 12px;font-size:13px;" placeholder="Dán link Spotify / Apple Music để kéo nhạc..." />
-        <button id="btnFetchMusic" class="btn-secondary" style="white-space:nowrap;">Lấy nhạc</button>
+        <input id="musicLinkInput" class="field-input" style="flex:1;padding:9px 12px;font-size:13px;" placeholder="Tìm tên bài hát, ca sĩ hoặc dán link..." />
+        <button id="btnFetchMusic" class="btn-secondary" style="white-space:nowrap;">Tìm</button>
+        <button id="btnRandomMusic" class="btn-secondary" style="white-space:nowrap;" title="Chọn ngẫu nhiên 1 bài">🎲</button>
       </div>
+      <div id="musicSearchResults" style="display:none;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;"></div>
       <div id="musicMetaPreview" style="display:none;align-items:center;gap:10px;background:#121215;border:1px solid rgba(29,185,84,0.45);border-radius:16px;padding:8px 10px;">
         <img id="musicMetaCover" alt="cover" style="width:40px;height:40px;border-radius:10px;object-fit:cover;" />
         <div style="flex:1;min-width:0;">
@@ -1335,9 +1436,9 @@
         </div>
         <button id="btnClearMusicMeta" class="btn-secondary" style="padding:4px 9px;">✕</button>
       </div>
-      <textarea id="capTextInput" class="field-input" rows="2" placeholder="Nhập chú thích (hỗ trợ xuống dòng)..."></textarea>
+      <!-- Quick Caption Input + Search -->
       <div style="display:flex;gap:8px;align-items:center;">
-        <input id="capIconInput" class="field-input" style="width:86px;padding:9px 12px;" placeholder="Icon" />
+        <input id="capIconInput" class="field-input" style="width:74px;padding:9px 10px;text-align:center;" placeholder="Icon" />
         <input id="capSearchInput" class="field-input" style="flex:1;padding:9px 12px;" placeholder="Tìm 150 mẫu chú thích..." />
       </div>
       <div id="capPresetsList" class="sheet-scroll"></div>
@@ -1434,13 +1535,27 @@
     ];
 
     const AI_STYLES = [
-      { name: "❄️ Tuyết rơi lãng mạn", prompt: "Add realistic falling snowflakes and soft winter glow lighting" },
-      { name: "🌸 Hoa anh đào bay", prompt: "Add soft pink cherry blossom petals floating in gentle sunlight" },
-      { name: "🌃 Cyberpunk Neon", prompt: "Transform background into vibrant rainy neon cyberpunk night street" },
-      { name: "🎨 Anime Studio Ghibli", prompt: "Restyle into hand-painted Studio Ghibli anime illustration aesthetic" },
-      { name: "👾 Pixel Art 16-bit", prompt: "Convert scene into crisp colorful 16-bit retro pixel art style" },
-      { name: "🌇 Nắng hoàng hôn ấm", prompt: "Bathe scene in warm golden hour sunset rim lighting and soft bokeh" },
-      { name: "✨ Kim tuyến lấp lánh", prompt: "Add dreamy golden sparkles and soft lens flare bokeh" }
+      { id: "ai_ghibli", cat: "Hoạt hình AI", icon: "🎨", name: "Ghibli", prompt: "Restyle into hand-painted Studio Ghibli anime illustration aesthetic" },
+      { id: "ai_shonen", cat: "Hoạt hình AI", icon: "⚡", name: "Shonen Anime", prompt: "Transform into vibrant high-contrast Japanese shonen anime style" },
+      { id: "ai_pixel", cat: "Hoạt hình AI", icon: "👾", name: "Pixel Art", prompt: "Convert scene into crisp colorful 16-bit retro pixel art style" },
+      { id: "ai_clay", cat: "Hoạt hình AI", icon: "🧸", name: "Đất nặn 3D", prompt: "Transform into cute handmade stop-motion claymation 3D character style" },
+      { id: "ai_lego", cat: "Hoạt hình AI", icon: "🧱", name: "Nhân vật LEGO", prompt: "Turn subject into glossy 3D LEGO minifigure toy style" },
+      { id: "ai_actionfig", cat: "Hoạt hình AI", icon: "📦", name: "Hộp Figure", prompt: "Style as collectible 3D action figure inside glossy display box" },
+      { id: "ai_cyber", cat: "Phong cách AI", icon: "🌃", name: "Cyberpunk", prompt: "Transform background into vibrant rainy neon cyberpunk night street" },
+      { id: "ai_90s", cat: "Phong cách AI", icon: "📼", name: "Phim 90s", prompt: "Apply authentic 1990s analog flash film photography look with soft grain" },
+      { id: "ai_polaroid", cat: "Phong cách AI", icon: "🖼️", name: "Polaroid", prompt: "Give warm vintage instant Polaroid film tone with nostalgic soft highlights" },
+      { id: "ai_golden", cat: "Phong cách AI", icon: "🌇", name: "Golden Hour", prompt: "Bathe scene in warm golden hour sunset rim lighting and soft bokeh" },
+      { id: "ai_synth", cat: "Phong cách AI", icon: "🟣", name: "Synthwave", prompt: "Add retro 80s purple and magenta synthwave neon glow lighting" },
+      { id: "ai_y2k", cat: "Phong cách AI", icon: "💿", name: "Y2K Glitch", prompt: "Apply early 2000s Y2K metallic pop aesthetic with subtle chromatic glow" },
+      { id: "ai_gothic", cat: "Phong cách AI", icon: "🦇", name: "Gothic Dark", prompt: "Apply moody dramatic dark gothic cinema lighting and cool shadows" },
+      { id: "ai_snow", cat: "Trend & Hiệu ứng AI", icon: "❄️", name: "Tuyết rơi", prompt: "Add realistic falling snowflakes and soft winter glow lighting" },
+      { id: "ai_sakura", cat: "Trend & Hiệu ứng AI", icon: "🌸", name: "Hoa anh đào", prompt: "Add soft pink cherry blossom petals floating in gentle sunlight" },
+      { id: "ai_sparkle", cat: "Trend & Hiệu ứng AI", icon: "✨", name: "Kim tuyến", prompt: "Add dreamy golden sparkles and soft lens flare bokeh" },
+      { id: "ai_ceo", cat: "Trend & Hiệu ứng AI", icon: "💼", name: "Tổng tài", prompt: "Add luxury dark tailored suit aesthetic and warm penthouse city lights behind" },
+      { id: "ai_idol", cat: "Trend & Hiệu ứng AI", icon: "🎤", name: "Idol K-Pop", prompt: "Add K-pop stage spotlight glow and dreamy concert bokeh background" },
+      { id: "ai_beach", cat: "Trend & Hiệu ứng AI", icon: "🏖️", name: "Nắng biển", prompt: "Add bright sunny tropical beach background with crisp turquoise ocean light" },
+      { id: "ai_shipper", cat: "Trend & Hiệu ứng AI", icon: "🛵", name: "Shipper Vibe", prompt: "Place subject in fun bustling Saigon street cafe vibe with sunny daylight" },
+      { id: "ai_grad", cat: "Trend & Hiệu ứng AI", icon: "🎓", name: "Lễ Tốt Nghiệp", prompt: "Add celebratory graduation confetti and warm campus sunlight bokeh" }
     ];
 
     const state = {
@@ -1457,6 +1572,12 @@
       boothCapturing: false,
       activeFrame: null,
       activeFrameCanvas: null,
+      pendingAiStyle: null,
+      isRecording: false,
+      mediaRecorder: null,
+      recTimerId: null,
+      recSeconds: 0,
+      quickModeIdx: 0,
       capturedBlob: null,
       capturedUrl: null,
       isVideo: false,
@@ -1880,6 +2001,11 @@
       if (!state.boothMode) {
         const blob = await captureSingleBlob(1080);
         enterSendStage(blob, false);
+        if (state.pendingAiStyle) {
+          const p = state.pendingAiStyle.prompt;
+          state.pendingAiStyle = null;
+          runAiEffect(p);
+        }
         return;
       }
 
@@ -2014,6 +2140,66 @@
       URL.revokeObjectURL(srcUrl);
       proc.classList.remove("show");
       return outBlob;
+    }
+
+    async function startHoldVideoRecording() {
+      const video = $("camVideo");
+      const canvas = $("camPreviewCanvas");
+      if (!video.videoWidth || state.isRecording) return;
+      const mimeCandidates = [
+        "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+        "video/mp4;codecs=avc1",
+        "video/mp4",
+        "video/webm;codecs=vp8,opus",
+        "video/webm"
+      ];
+      const mimeType = typeof MediaRecorder !== "undefined"
+        ? (mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "")
+        : "";
+      if (!mimeType) return showToast("Trình duyệt không hỗ trợ quay video trực tiếp.");
+
+      state.isRecording = true;
+      state.recSeconds = 0;
+      $("btnShutter").classList.add("recording");
+      $("recTimerPill").classList.add("show");
+      $("recTimerText").textContent = "00:00 / 01:00";
+
+      const stream = canvas.captureStream(24);
+      const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 680000 });
+      state.mediaRecorder = recorder;
+      const chunks = [];
+      recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+      recorder.onstop = () => {
+        clearInterval(state.recTimerId);
+        state.isRecording = false;
+        $("btnShutter").classList.remove("recording");
+        $("recTimerPill").classList.remove("show");
+        const outBlob = new Blob(chunks, { type: mimeType.split(";")[0] });
+        if (outBlob.size > 5.8 * 1024 * 1024) {
+          showToast("Video vừa quay hơi nặng (> 5.8 MB), hãy quay ngắn hơn chút nhé!", 3500);
+          return;
+        }
+        if (outBlob.size > 2000) {
+          enterSendStage(outBlob, true);
+        }
+      };
+      recorder.start(300);
+
+      state.recTimerId = setInterval(() => {
+        state.recSeconds += 1;
+        const mm = String(Math.floor(state.recSeconds / 60)).padStart(2, "0");
+        const ss = String(state.recSeconds % 60).padStart(2, "0");
+        $("recTimerText").textContent = `${mm}:${ss} / 01:00`;
+        if (state.recSeconds >= 60) {
+          stopHoldVideoRecording();
+        }
+      }, 1000);
+    }
+
+    function stopHoldVideoRecording() {
+      if (state.isRecording && state.mediaRecorder && state.mediaRecorder.state !== "inactive") {
+        state.mediaRecorder.stop();
+      }
     }
 
     function enterSendStage(blob, isVideo = false) {
@@ -2181,12 +2367,43 @@
       };
     }
 
+    const QUICK_CAP_MODES = [
+      { id: "standard", icon: "", placeholder: "Thêm một tin nhắn", colors: [], textColor: "#FFFFFF" },
+      { id: "breaking_news", icon: "🚨", placeholder: "TIN NÓNG: Đang có biến...", colors: ["#E50914", "#B8000B"], textColor: "#FFFFFF" },
+      { id: "poll", icon: "📊", placeholder: "Đặt một câu hỏi (👍/👎)...", colors: ["#2B2B30", "#18181B"], textColor: "#FFFFFF" },
+      { id: "gen_music", icon: "🎵", placeholder: "Đang phát nhạc...", colors: ["#1D1D22", "#121215"], textColor: "#FFFFFF" },
+      { id: "gen_location", icon: "📍", placeholder: "Vị trí hiện tại...", colors: [], textColor: "#FFFFFF" },
+      { id: "gen_weather", icon: "☀️", placeholder: "25°C Trời đẹp", colors: ["#370C6F", "#575CD4"], textColor: "#FFFFFF" }
+    ];
+
+    function renderCapDots() {
+      const row = $("capDotsRow");
+      if (!row) return;
+      row.innerHTML = QUICK_CAP_MODES.map((m, i) =>
+        `<div class="cap-dot ${state.quickModeIdx === i ? "active" : ""}" data-qidx="${i}"></div>`
+      ).join("");
+      row.querySelectorAll(".cap-dot").forEach((d) => {
+        d.addEventListener("click", () => applyQuickCapMode(parseInt(d.dataset.qidx, 10)));
+      });
+    }
+
+    function applyQuickCapMode(idx) {
+      state.quickModeIdx = (idx + QUICK_CAP_MODES.length) % QUICK_CAP_MODES.length;
+      const m = QUICK_CAP_MODES[state.quickModeIdx];
+      state.caption.presetId = m.id;
+      state.caption.icon = m.icon;
+      state.caption.colors = m.colors;
+      state.caption.textColor = m.textColor;
+      $("capInlineInput").placeholder = m.placeholder;
+      updateCaptionPillUI();
+      renderCapDots();
+    }
+
     function updateCaptionPillUI() {
-      const t = state.caption.text.trim();
       const ic = state.caption.icon.trim();
-      $("capPillText").textContent = t || "Thêm một tin nhắn";
+      $("capInlineInput").value = state.caption.text;
       $("capPillIcon").textContent = (ic && !ic.includes(".")) ? ic : "";
-      const pill = $("btnOpenCaptionSheet");
+      const pill = $("captionPillBox");
       const cols = state.caption.colors || [];
       if (cols.length >= 2) {
         pill.style.background = `linear-gradient(90deg, ${cols[0]}, ${cols[1]})`;
@@ -2195,6 +2412,7 @@
         pill.style.background = "rgba(24, 24, 27, 0.68)";
         pill.style.color = "#fff";
       }
+      renderCapDots();
     }
 
     // =========================================================================
@@ -2515,35 +2733,59 @@
       });
     }
 
-    async function fetchMusicMetadataFromWorker() {
-      const link = $("musicLinkInput").value.trim();
-      if (!link) return showToast("Dán link Spotify hoặc Apple Music trước nhé!");
-      const btn = $("btnFetchMusic");
-      btn.disabled = true; btn.textContent = "Đang kéo...";
+    function selectMusicTrack(mm) {
+      state.caption.musicMeta = mm;
+      state.caption.presetId = "gen_music";
+      state.caption.colors = ["#1D1D22", "#121215"];
+      state.caption.textColor = "#FFFFFF";
+      state.caption.icon = "🎵";
+      state.caption.text = mm.artist ? `${mm.song_title} • ${mm.artist}` : mm.song_title;
+      $("musicMetaTitle").textContent = mm.song_title || "";
+      $("musicMetaArtist").textContent = `${mm.artist || ""} ${mm.isrc ? `• ${mm.isrc}` : ""}`;
+      $("musicMetaCover").style.display = mm.image_url ? "block" : "none";
+      if (mm.image_url) $("musicMetaCover").src = mm.image_url;
+      $("musicMetaPreview").style.display = "flex";
+      $("musicSearchResults").style.display = "none";
+      updateCaptionPillUI();
+      showToast(`Đã gắn nhạc: ${mm.song_title}`);
+    }
+
+    async function searchMusicFromWorker(isRandom = false) {
+      const q = $("musicLinkInput").value.trim();
+      if (!isRandom && !q) return showToast("Nhập tên bài hát hoặc bấm 🎲 để random!");
+      const btn = isRandom ? $("btnRandomMusic") : $("btnFetchMusic");
+      const oldTxt = btn.textContent;
+      btn.disabled = true; btn.textContent = "...";
       try {
-        const res = await fetch(`${WORKER_URL}/music/metadata`, {
+        const res = await fetch(`${WORKER_URL}/music/search`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: link })
+          body: JSON.stringify({ q, random: isRandom })
         });
         const json = await res.json();
-        if (!res.ok || !json.data) throw new Error(json.error || "Không kéo được thông tin nhạc");
-        const mm = json.data;
-        state.caption.musicMeta = mm;
-        state.caption.presetId = "gen_music";
-        state.caption.colors = [];
-        state.caption.textColor = "#FFFFFF";
-        $("capTextInput").value = mm.artist ? `${mm.song_title} • ${mm.artist}` : mm.song_title;
-        $("musicMetaTitle").textContent = mm.song_title || "";
-        $("musicMetaArtist").textContent = `${mm.artist || ""} ${mm.isrc ? `• ${mm.isrc}` : ""}`;
-        $("musicMetaCover").style.display = mm.image_url ? "block" : "none";
-        if (mm.image_url) $("musicMetaCover").src = mm.image_url;
-        $("musicMetaPreview").style.display = "flex";
-        showToast(`Đã kéo nhạc: ${mm.song_title}`);
+        const tracks = json.data || [];
+        if (!res.ok || !tracks.length) throw new Error(json.error || "Không tìm thấy bài hát");
+        if (isRandom || tracks.length === 1) {
+          selectMusicTrack(tracks[0]);
+          return;
+        }
+        const box = $("musicSearchResults");
+        box.style.display = "flex";
+        box.innerHTML = tracks.map((t, idx) => `
+          <div class="music-track-row" data-tidx="${idx}">
+            <img src="${t.image_url || ""}" alt="cv" style="width:38px;height:38px;border-radius:8px;object-fit:cover;background:#222;" />
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.song_title}</div>
+              <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.artist}</div>
+            </div>
+          </div>`).join("");
+        box.querySelectorAll(".music-track-row").forEach((row) => {
+          row.addEventListener("click", () => selectMusicTrack(tracks[parseInt(row.dataset.tidx, 10)]));
+        });
       } catch (err) {
-        showToast(`Lỗi kéo nhạc: ${err.message}`, 3500);
+        showToast(`Lỗi tìm nhạc: ${err.message}`, 3200);
       } finally {
-        btn.disabled = false; btn.textContent = "Lấy nhạc";
+        btn.disabled = false; btn.textContent = oldTxt;
       }
     }
 
@@ -2613,6 +2855,12 @@
       return c;
     }
 
+    function isFaceCutoutFrame(fr) {
+      if (!fr) return false;
+      const txt = `${fr.name || ""} ${fr.category || ""}`.toLowerCase();
+      return /ghép mặt|lồng mặt|khoét mặt|mona|lisa|faker|face/.test(txt);
+    }
+
     async function applyActiveFrame(fr) {
       state.activeFrame = fr;
       state.activeFrameCanvas = null;
@@ -2623,17 +2871,28 @@
         $("btnClearFrame").style.display = "none";
         return;
       }
+      $("btnClearFrame").textContent = `✕ ${fr.name.slice(0, 14)}`;
       $("btnClearFrame").style.display = "inline-flex";
+      const showLive = isFaceCutoutFrame(fr);
       try {
         const processed = await processFrameTransparency(fr.url);
         if (state.activeFrame?.id !== fr.id) return;
         state.activeFrameCanvas = processed;
-        ov.src = processed.toDataURL("image/png");
-        ov.style.display = "block";
+        if (showLive) {
+          ov.src = processed.toDataURL("image/png");
+          ov.style.display = "block";
+        } else {
+          ov.style.display = "none";
+          ov.src = "";
+        }
       } catch {
         if (state.activeFrame?.id !== fr.id) return;
-        ov.src = fr.url;
-        ov.style.display = "block";
+        if (showLive) {
+          ov.src = fr.url;
+          ov.style.display = "block";
+        } else {
+          ov.style.display = "none";
+        }
       }
     }
 
@@ -2689,8 +2948,39 @@
             </div>`;
         });
 
+        // Put ALL AI Styles at the bottom of the drawer (with PTB frames)
+        const aiCats = {};
+        AI_STYLES.forEach((a) => { (aiCats[a.cat] = aiCats[a.cat] || []).push(a); });
+        Object.entries(aiCats).forEach(([acat, alist]) => {
+          html += `
+            <div>
+              <div class="fx-section-title">${acat}</div>
+              <div class="fx-hscroll">
+                ${alist.map((a) => {
+                  const act = state.pendingAiStyle?.id === a.id ? "active" : "";
+                  return `<div class="fx-tile ${act}" data-ai-id="${a.id}"><div class="fx-thumb">${a.icon}</div><span>${a.name}</span></div>`;
+                }).join("")}
+              </div>
+            </div>`;
+        });
+
         body.innerHTML = html;
       }
+
+      body.querySelectorAll("[data-ai-id]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const item = AI_STYLES.find((x) => x.id === el.dataset.aiId);
+          if (!item) return;
+          if ($("sendStage").classList.contains("active")) {
+            $("fxDrawerSheet").classList.remove("open");
+            runAiEffect(item.prompt);
+          } else {
+            state.pendingAiStyle = state.pendingAiStyle?.id === item.id ? null : item;
+            showToast(state.pendingAiStyle ? `Đã hẹn AI: ${item.name} (chụp xong tự rửa)` : "Đã bỏ hẹn AI");
+            renderFxSheet($("fxFrameSearch").value);
+          }
+        });
+      });
 
       body.querySelectorAll("[data-fid]").forEach((el) => {
         el.addEventListener("click", () => {
@@ -2711,22 +3001,28 @@
       const q = query.trim().toLowerCase();
       const filtered = COLOR_PRESETS.filter((p) => !q || p.name.toLowerCase().includes(q) || (p.sample_text || "").toLowerCase().includes(q));
       const list = $("capPresetsList");
-      list.innerHTML = filtered.map((p) => {
+      list.innerHTML = `<div class="cap-pills-wrap">` + filtered.map((p) => {
         const cols = p.colors || [];
         const bgStyle = cols.length >= 2
           ? `background:linear-gradient(90deg, ${cols[0]}, ${cols[1]});color:${p.text_color || '#fff'};`
-          : `background:rgba(255,255,255,0.08);color:#fff;`;
-        return `<button class="preset-item" data-pid="${p.id}" style="${bgStyle}"><span>${p.name}</span></button>`;
-      }).join("");
-      list.querySelectorAll(".preset-item").forEach((b) => {
+          : `background:rgba(255,255,255,0.09);color:#fff;`;
+        const shortName = p.name.replace(/\s*\([^)]*\)/g, "").trim();
+        return `<button class="preset-pill" data-pid="${p.id}" style="${bgStyle}"><span>${shortName}</span></button>`;
+      }).join("") + `</div>`;
+      list.querySelectorAll(".preset-pill").forEach((b) => {
         b.addEventListener("click", () => {
           const p = COLOR_PRESETS.find((x) => x.id === b.dataset.pid);
           if (!p) return;
           state.caption.presetId = p.id;
           state.caption.colors = p.colors || [];
           state.caption.textColor = p.text_color || "#FFFFFF";
-          if (!$("capTextInput").value.trim() && p.sample_text) $("capTextInput").value = p.sample_text;
-          if (p.sample_icon && !$("capIconInput").value.trim()) $("capIconInput").value = p.sample_icon;
+          if (!state.caption.text.trim() && p.sample_text) state.caption.text = p.sample_text;
+          if (p.sample_icon) {
+            state.caption.icon = p.sample_icon;
+            $("capIconInput").value = p.sample_icon;
+          }
+          updateCaptionPillUI();
+          $("captionSheet").classList.remove("open");
           showToast(`Đã chọn: ${p.name}`);
         });
       });
@@ -2790,7 +3086,31 @@
         $("btnBoothMode").classList.toggle("on", state.boothMode);
       });
       $("btnClearFrame").addEventListener("click", () => applyActiveFrame(null));
-      $("btnShutter").addEventListener("click", handleShutterClick);
+      let holdTimer = null;
+      let didHold = false;
+      const shutterEl = $("btnShutter");
+      shutterEl.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        didHold = false;
+        holdTimer = setTimeout(() => {
+          didHold = true;
+          startHoldVideoRecording();
+        }, 260);
+      });
+      const endShutter = () => {
+        clearTimeout(holdTimer);
+        if (didHold) {
+          stopHoldVideoRecording();
+        } else {
+          handleShutterClick();
+        }
+        didHold = false;
+      };
+      shutterEl.addEventListener("pointerup", endShutter);
+      shutterEl.addEventListener("pointercancel", () => {
+        clearTimeout(holdTimer);
+        stopHoldVideoRecording();
+      });
 
       // Inside-camera inline filter carousel toggle
       $("btnToggleCamFilters").addEventListener("click", () => {
@@ -2857,32 +3177,45 @@
         a.href = state.capturedUrl; a.download = `locket_${Date.now()}.webp`; a.click();
       });
 
-      // Caption & Music
+      // Inline Caption Input + Swipe Dots + Caption Sheet
+      $("capInlineInput").addEventListener("input", (e) => {
+        state.caption.text = e.target.value;
+      });
+      let touchStartX = 0;
+      $("sendPreviewBox").addEventListener("touchstart", (e) => {
+        touchStartX = e.changedTouches?.[0]?.clientX || 0;
+      }, { passive: true });
+      $("sendPreviewBox").addEventListener("touchend", (e) => {
+        const dx = (e.changedTouches?.[0]?.clientX || 0) - touchStartX;
+        if (Math.abs(dx) > 48) {
+          applyQuickCapMode(state.quickModeIdx + (dx < 0 ? 1 : -1));
+        }
+      }, { passive: true });
+
       $("btnOpenCaptionSheet").addEventListener("click", () => {
-        $("capTextInput").value = state.caption.text;
         $("capIconInput").value = state.caption.icon;
         renderCaptionPresets($("capSearchInput").value);
         $("captionSheet").classList.add("open");
       });
       $("capSearchInput").addEventListener("input", (e) => renderCaptionPresets(e.target.value));
       $("btnCloseCaptionSheet").addEventListener("click", () => {
-        state.caption.text = $("capTextInput").value;
         state.caption.icon = $("capIconInput").value;
         updateCaptionPillUI();
         $("captionSheet").classList.remove("open");
       });
-      $("btnFetchMusic").addEventListener("click", fetchMusicMetadataFromWorker);
+      $("btnFetchMusic").addEventListener("click", () => searchMusicFromWorker(false));
+      $("btnRandomMusic").addEventListener("click", () => searchMusicFromWorker(true));
       $("btnClearMusicMeta").addEventListener("click", () => {
         state.caption.musicMeta = null;
         $("musicMetaPreview").style.display = "none";
         $("musicLinkInput").value = "";
       });
 
-      // AI Wash
+      // AI Wash (all 21 categorized styles)
       $("btnAiWash").addEventListener("click", () => {
-        $("aiPresetList").innerHTML = AI_STYLES.map((s, idx) =>
-          `<button class="btn-secondary" data-aidx="${idx}" style="text-align:left;border-radius:16px;padding:12px 14px;">${s.name}</button>`
-        ).join("") + `<button id="btnRunCustomAi" class="btn-primary" style="margin-top:6px;">Chạy mô tả tự nhập ở trên</button>`;
+        $("aiPresetList").innerHTML = `<div class="cap-pills-wrap">` + AI_STYLES.map((st, idx) =>
+          `<button class="preset-pill" data-aidx="${idx}" style="background:rgba(255,255,255,0.09);color:#fff;">${st.icon} ${st.name}</button>`
+        ).join("") + `</div><button id="btnRunCustomAi" class="btn-primary" style="margin-top:10px;">Chạy mô tả tự nhập ở trên</button>`;
         $("aiPresetList").querySelectorAll("[data-aidx]").forEach((b) => {
           b.addEventListener("click", () => runAiEffect(AI_STYLES[parseInt(b.dataset.aidx, 10)].prompt));
         });
