@@ -1140,11 +1140,9 @@
   <div id="loginScreen" class="login-screen">
     <div class="login-card">
       <div style="text-align:center;">
-        <div style="width:52px;height:52px;margin:0 auto 8px;border-radius:16px;background:var(--gold-soft);border:1px solid rgba(245,184,0,0.4);display:flex;align-items:center;justify-content:center;color:var(--gold);">
-          <svg class="ico" style="width:26px;height:26px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        </div>
-        <h2 style="margin:0;font-size:20px;font-weight:800;">Locket Gold Studio</h2>
-        <div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:4px;">Bản Share • Cloudflare Pages</div>
+        <img src="https://i.ibb.co/sJmwb3WL/IMG-1730.jpg" alt="Shin" style="width:62px;height:62px;margin:0 auto 8px;border-radius:999px;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 18px rgba(245,184,0,0.3);display:block;" />
+        <h2 style="margin:0;font-size:19px;font-weight:800;">Locket gold by Văn Trường</h2>
+        <div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:4px;">Bản Share • Studio Edition</div>
       </div>
       <input id="loginEmail" class="field-input" type="email" placeholder="Email Locket của bạn..." autocomplete="email" />
       <input id="loginPass" class="field-input" type="password" placeholder="Mật khẩu..." autocomplete="current-password" />
@@ -1160,8 +1158,9 @@
   <div class="app-shell">
     <!-- Top Bar -->
     <div class="top-bar">
-      <button id="btnTopTools" class="glass-circle" title="Thông tin & Admin">
-        <svg class="ico" viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      <button id="btnTopTools" class="pill-center" style="padding:0 10px 0 4px;gap:6px;height:38px;" title="Locket gold by Văn Trường">
+        <img src="https://i.ibb.co/sJmwb3WL/IMG-1730.jpg" alt="Shin" style="width:30px;height:30px;border-radius:999px;object-fit:cover;border:1.5px solid var(--gold);" />
+        <span style="font-size:10px;line-height:1.1;text-align:left;color:var(--gold);font-weight:800;">Locket gold<br/>by Văn Trường</span>
       </button>
       <button id="btnTopTitle" class="pill-center">
         <svg class="ico" style="width:16px;height:16px;" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -1708,10 +1707,14 @@
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(bodyData)
       });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || json.errors?.length) {
-        const rawErr = json.error || json.errors || json;
-        const errMsg = typeof rawErr === "string" ? rawErr : (rawErr?.message || JSON.stringify(rawErr));
+      const rawTxt = await res.text().catch(() => "");
+      let json = {};
+      try { json = rawTxt ? JSON.parse(rawTxt) : {}; } catch { json = { error: rawTxt }; }
+      const nestedErrs = json.errors?.length ? json.errors : (json.result?.errors?.length ? json.result.errors : null);
+      if (!res.ok || nestedErrs) {
+        const rawErr = nestedErrs || json.error || json.result?.error || rawTxt || `HTTP ${res.status}`;
+        let errMsg = typeof rawErr === "string" ? rawErr : (rawErr?.message || JSON.stringify(rawErr));
+        if (!errMsg || errMsg === "{}" || errMsg === "[]") errMsg = `HTTP ${res.status} (${rawTxt.slice(0, 120) || "empty"})`;
         throw new Error(errMsg);
       }
       return json;
@@ -2480,11 +2483,20 @@
       if (!initRes.ok || !initJson.uploadUrl) throw new Error(initJson.error || "Không khởi tạo được upload");
       const putRes = await fetch(`${WORKER_URL}/storage/upload`, {
         method: "PUT",
-        headers: { "X-Upload-Url": initJson.uploadUrl, "X-Content-Type": contentType },
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "X-Upload-Url": initJson.uploadUrl,
+          "X-Content-Type": contentType
+        },
         body: blob
       });
-      const putJson = await putRes.json();
-      if (!putRes.ok || !putJson.downloadTokens) throw new Error(putJson.error || "Upload thất bại (Dung lượng > 5.8 MB)");
+      const putTxt = await putRes.text().catch(() => "");
+      let putJson = {};
+      try { putJson = putTxt ? JSON.parse(putTxt) : {}; } catch { putJson = { error: putTxt }; }
+      if (!putRes.ok || !putJson.downloadTokens) {
+        const em = typeof putJson.error === "string" ? putJson.error : (putJson.error?.message || putTxt || `HTTP ${putRes.status}`);
+        throw new Error(`Upload lỗi (${putRes.status}): ${em}`);
+      }
       return `${initJson.baseStorage}/${initJson.encodedName}?alt=media&token=${String(putJson.downloadTokens).split(",")[0]}`;
     }
 
