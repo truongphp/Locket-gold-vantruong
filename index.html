@@ -5,21 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Locket Gold Studio • Share Edition</title>
+  <title>Locket Gold Studio</title>
   <style>
     :root {
-      --bg: #0b0a09;
-      --surface: #181715;
-      --surface-2: #24221f;
-      --border: rgba(255, 255, 255, 0.1);
+      --bg: #0c0b0a;
+      --surface: rgba(34, 32, 29, 0.82);
+      --surface-solid: #191816;
+      --surface-2: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.11);
       --text: #faf8f5;
-      --muted: #9e9a93;
+      --muted: rgba(250, 248, 245, 0.56);
       --gold: #f5b800;
       --gold-soft: rgba(245, 184, 0, 0.16);
       --danger: #ff453a;
       --ok: #30d158;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --spring: cubic-bezier(0.22, 1, 0.36, 1);
     }
     * {
       box-sizing: border-box;
@@ -39,83 +41,93 @@
       height: 100dvh;
       overflow: hidden;
     }
+    svg.ico {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: block;
+      flex-shrink: 0;
+    }
     .app-shell {
       position: relative;
       width: 100%;
       max-width: 460px;
       height: 100dvh;
       margin: 0 auto;
-      background: radial-gradient(circle at 50% 0%, #1d1a14 0%, #0b0a09 55%);
+      background: radial-gradient(circle at 50% -10%, #262018 0%, #0e0d0b 48%, #070706 100%);
       display: flex;
       flex-direction: column;
       overflow: hidden;
       padding-top: var(--safe-top);
     }
-    /* Top Header */
+
+    /* Top Header (Exact Locket iOS proportions) */
     .top-bar {
       flex-shrink: 0;
       height: 54px;
-      padding: 6px 16px;
+      padding: 6px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       z-index: 20;
     }
-    .icon-circle {
+    .glass-circle {
       width: 40px;
       height: 40px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.09);
       border: 1px solid rgba(255, 255, 255, 0.08);
       color: var(--text);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
       cursor: pointer;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: transform 0.12s ease, background 0.15s ease;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      transition: transform 0.18s var(--spring), background 0.18s ease;
     }
-    .icon-circle:active { transform: scale(0.92); }
+    .glass-circle:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.16); }
     .pill-center {
       height: 38px;
       padding: 0 16px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.11);
+      background: rgba(255, 255, 255, 0.09);
       border: 1px solid rgba(255, 255, 255, 0.08);
       color: var(--text);
       font-size: 14px;
       font-weight: 700;
+      letter-spacing: -0.01em;
       display: inline-flex;
       align-items: center;
       gap: 7px;
       cursor: pointer;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      transition: transform 0.18s var(--spring);
     }
+    .pill-center:active { transform: scale(0.95); }
     .avatar-btn {
       width: 40px;
       height: 40px;
       border-radius: 999px;
       border: 2px solid var(--gold);
-      background: #27241e;
+      background: #231f19;
       overflow: hidden;
       cursor: pointer;
       padding: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 15px;
       color: var(--gold);
+      box-shadow: 0 0 14px rgba(245, 184, 0, 0.25);
+      transition: transform 0.18s var(--spring);
     }
-    .avatar-btn img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .avatar-btn:active { transform: scale(0.92); }
+    .avatar-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     /* Main Stage */
     .main-stage {
@@ -124,32 +136,37 @@
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: 4px 14px calc(92px + var(--safe-bottom));
+      padding: 4px 14px calc(86px + var(--safe-bottom));
       display: flex;
       flex-direction: column;
     }
     .view-panel { display: none; flex-direction: column; flex: 1; min-height: 0; }
-    .view-panel.active { display: flex; }
+    .view-panel.active { display: flex; animation: fadeIn 0.22s var(--spring); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-    /* Camera View */
+    /* Camera Stage (Exact Locket Video Proportions) */
     .cam-stage {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: space-between;
+      flex: 1;
       gap: 10px;
       width: 100%;
+      padding-top: 6px;
     }
     .cam-box {
       position: relative;
-      width: min(86vw, 356px);
-      max-height: 44dvh;
-      aspect-ratio: 1 / 1;
-      border-radius: 34px;
+      width: min(92vw, 392px, 49dvh);
+      height: min(92vw, 392px, 49dvh);
+      border-radius: 44px;
       overflow: hidden;
       background: #141311;
-      border: 1.5px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.72);
       flex-shrink: 0;
     }
     #camVideo {
@@ -175,158 +192,231 @@
       display: none;
       z-index: 3;
     }
-    .cam-corner-tl {
+    .cam-top-controls {
       position: absolute;
-      top: 12px;
-      left: 12px;
+      top: 14px;
+      left: 14px;
+      right: 14px;
       z-index: 6;
       display: flex;
-      gap: 6px;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
     }
-    .cam-corner-tr {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 6;
+    .cam-top-group {
       display: flex;
       gap: 6px;
+      pointer-events: auto;
     }
-    .cam-mini-pill {
+    .cam-pill-mini {
       height: 30px;
-      padding: 0 10px;
+      padding: 0 11px;
       border-radius: 999px;
-      background: rgba(12, 12, 14, 0.56);
+      background: rgba(15, 14, 13, 0.48);
       border: 1px solid rgba(255, 255, 255, 0.16);
-      color: #fff;
+      color: rgba(255, 255, 255, 0.92);
       font-size: 12px;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
       gap: 4px;
       cursor: pointer;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.18s var(--spring);
     }
-    .cam-mini-pill.on {
-      background: rgba(245, 184, 0, 0.9);
+    .cam-pill-mini.on {
+      background: rgba(245, 184, 0, 0.92);
       color: #111;
       border-color: transparent;
+    }
+
+    /* Bottom-inside-camera overlay controls (matches Locket video) */
+    .cam-bottom-overlay {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      z-index: 7;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .cam-filter-label {
+      align-self: center;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+      display: none;
+    }
+    .cam-corner-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: auto;
+    }
+    .cam-corner-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: rgba(15, 14, 13, 0.52);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: transform 0.18s var(--spring), background 0.18s ease;
+    }
+    .cam-corner-icon:active { transform: scale(0.88); }
+    .cam-corner-icon.active {
+      background: #fff;
+      color: #111;
+    }
+
+    /* Inline Filter Carousel inside bottom of camera (matches 0:02 of video) */
+    .cam-inline-carousel {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+      background: rgba(14, 13, 12, 0.52);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 999px;
+      padding: 5px 8px;
+      animation: fadeIn 0.18s var(--spring);
+    }
+    .cam-inline-carousel.open { display: flex; }
+    .cam-carousel-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex: 1;
+      padding: 2px 0;
+    }
+    .cam-carousel-scroll::-webkit-scrollbar { display: none; }
+    .cam-orb {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.16s var(--spring), border-color 0.16s ease;
+    }
+    .cam-orb.active {
+      border-color: var(--gold);
+      background: rgba(245, 184, 0, 0.24);
+      transform: scale(1.08);
+    }
+
+    /* Processing / Countdown Overlay inside box */
+    .cam-processing {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 24px;
+      background: rgba(0, 0, 0, 0.36);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .cam-processing.show { display: flex; }
+    .processing-pill {
+      padding: 9px 18px;
+      border-radius: 999px;
+      background: rgba(24, 24, 27, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
     .cam-countdown {
       position: absolute;
       inset: 0;
-      z-index: 8;
+      z-index: 9;
       display: none;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.42);
-      font-size: 64px;
+      background: rgba(0, 0, 0, 0.38);
+      font-size: 72px;
       font-weight: 900;
-      color: var(--gold);
-      text-shadow: 0 6px 24px rgba(0,0,0,0.7);
+      color: #fff;
+      text-shadow: 0 8px 28px rgba(0,0,0,0.7);
     }
     .cam-no-perm {
       position: absolute;
       inset: 0;
-      z-index: 4;
+      z-index: 5;
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 20px;
-      gap: 10px;
-      background: #161513;
+      padding: 24px;
+      gap: 12px;
+      background: #141311;
       color: var(--muted);
       font-size: 13px;
     }
 
-    /* Filter Strip OUTSIDE Camera Box */
-    .filter-strip-wrap {
+    /* Shutter Controls (Clean 3-icon row + History pill like Locket iOS) */
+    .shutter-block {
       width: 100%;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding: 2px 2px;
-      position: relative;
-      z-index: 10;
+      gap: 12px;
+      padding-bottom: 4px;
     }
-    .drawer-trigger-btn {
-      flex-shrink: 0;
-      height: 36px;
-      padding: 0 12px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #f5b800, #ff8a00);
-      color: #111;
-      font-size: 13px;
-      font-weight: 800;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .filter-strip {
-      display: flex;
-      gap: 7px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding: 2px 4px;
-      flex: 1;
-    }
-    .filter-strip::-webkit-scrollbar { display: none; }
-    .filter-chip {
-      flex-shrink: 0;
-      height: 34px;
-      padding: 0 12px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .filter-chip.active {
-      background: #fff;
-      color: #111;
-      border-color: #fff;
-      font-weight: 700;
-    }
-
-    /* Shutter Controls OUTSIDE Camera Box */
     .shutter-row {
       width: 100%;
-      max-width: 340px;
+      max-width: 310px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 4px 8px;
-      position: relative;
-      z-index: 10;
     }
     .side-cam-btn {
-      width: 50px;
-      height: 50px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: var(--text);
-      font-size: 22px;
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.88);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      position: relative;
+      transition: transform 0.16s var(--spring), background 0.16s ease;
     }
-    .side-cam-btn:active { transform: scale(0.92); }
+    .side-cam-btn:active { transform: scale(0.86); background: rgba(255, 255, 255, 0.08); }
+    .side-cam-btn svg.ico { width: 27px; height: 27px; stroke-width: 1.9; }
     .shutter-btn {
-      width: 78px;
-      height: 78px;
+      width: 82px;
+      height: 82px;
       border-radius: 999px;
       background: transparent;
       border: 4px solid var(--gold);
@@ -335,48 +425,72 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.12s ease;
+      box-shadow: 0 0 28px rgba(245, 184, 0, 0.22);
+      transition: transform 0.14s var(--spring);
     }
-    .shutter-btn:active { transform: scale(0.92); }
+    .shutter-btn:active { transform: scale(0.9); }
     .shutter-inner {
       width: 100%;
       height: 100%;
       border-radius: 999px;
       background: #fff;
-      display: flex;
+      transition: transform 0.14s var(--spring);
+    }
+    .history-shortcut {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      opacity: 0.88;
+      padding: 4px 12px;
+    }
+    .history-badge {
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.92);
       color: #111;
       font-size: 12px;
-      font-weight: 900;
-    }
-    .cam-hint-bar {
-      font-size: 12px;
-      color: var(--muted);
-      text-align: center;
-      display: flex;
+      font-weight: 800;
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
     }
 
-    /* Post-Capture / Send Stage (Hidden until photo/video ready) */
+    /* Post-Capture Send Stage (Exact IMG_2575) */
     .send-stage {
       display: none;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       width: 100%;
+      padding-top: 2px;
+      animation: fadeIn 0.22s var(--spring);
     }
     .send-stage.active { display: flex; }
+    .send-top-row {
+      width: min(92vw, 392px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+    }
     .send-preview-box {
       position: relative;
-      width: min(86vw, 356px);
-      aspect-ratio: 1 / 1;
-      border-radius: 34px;
+      width: min(92vw, 392px, 47dvh);
+      height: min(92vw, 392px, 47dvh);
+      border-radius: 44px;
       overflow: hidden;
       background: #141311;
-      border: 1.5px solid rgba(255, 255, 255, 0.14);
-      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.72);
+      flex-shrink: 0;
     }
     .send-preview-box img,
     .send-preview-box video {
@@ -387,111 +501,113 @@
     }
     .caption-pill-overlay {
       position: absolute;
-      bottom: 14px;
+      bottom: 16px;
       left: 50%;
       transform: translateX(-50%);
-      max-width: 88%;
-      padding: 9px 16px;
+      max-width: 86%;
+      padding: 10px 18px;
       border-radius: 999px;
-      background: rgba(24, 24, 27, 0.72);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(24, 24, 27, 0.68);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       z-index: 5;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
     }
     .send-actions-row {
       width: 100%;
-      max-width: 340px;
+      max-width: 310px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 2px 12px;
     }
     .send-circle-btn {
-      width: 72px;
-      height: 72px;
+      width: 76px;
+      height: 76px;
       border-radius: 999px;
-      background: var(--gold);
-      color: #111;
-      border: none;
-      font-size: 26px;
-      font-weight: 900;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 10px 28px rgba(245, 184, 0, 0.35);
+      transition: transform 0.16s var(--spring), background 0.16s ease;
     }
-    .send-circle-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .send-circle-btn:active { transform: scale(0.93); }
-    .ai-wash-btn {
-      height: 46px;
+    .send-circle-btn:active { transform: scale(0.9); background: var(--gold); color: #111; }
+    .send-circle-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .send-circle-btn svg.ico { width: 30px; height: 30px; }
+    .ai-wash-pill {
+      height: 44px;
       padding: 0 14px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(245, 184, 0, 0.45);
+      background: rgba(245, 184, 0, 0.14);
+      border: 1px solid rgba(245, 184, 0, 0.42);
       color: var(--gold);
       font-size: 12px;
       font-weight: 800;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
     }
+
+    /* Friends Horizontal Strip */
     .friends-strip {
       width: 100%;
       display: flex;
-      gap: 12px;
+      gap: 14px;
       overflow-x: auto;
-      padding: 4px 6px;
+      padding: 2px 8px;
       scrollbar-width: none;
     }
     .friends-strip::-webkit-scrollbar { display: none; }
     .friend-chip {
       flex-shrink: 0;
-      width: 58px;
+      width: 56px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       cursor: pointer;
     }
     .friend-ring {
       width: 48px;
       height: 48px;
       border-radius: 999px;
-      border: 2px solid rgba(255, 255, 255, 0.18);
-      background: var(--surface);
+      border: 2px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.06);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
+      color: var(--text);
+      transition: all 0.16s var(--spring);
     }
     .friend-chip.selected .friend-ring {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 2px rgba(245, 184, 0, 0.35);
+      border-color: #fff;
+      box-shadow: 0 0 0 2px rgba(245, 184, 0, 0.6);
+      background: rgba(255, 255, 255, 0.15);
     }
     .friend-ring img { width: 100%; height: 100%; object-fit: cover; }
     .friend-name {
       font-size: 11px;
       color: var(--muted);
-      max-width: 58px;
+      max-width: 56px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -509,40 +625,37 @@
     .grid-tile {
       position: relative;
       aspect-ratio: 1 / 1;
-      border-radius: 16px;
+      border-radius: 18px;
       overflow: hidden;
-      background: var(--surface);
+      background: var(--surface-solid);
       cursor: pointer;
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .grid-tile img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .grid-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .grid-badge {
       position: absolute;
       top: 6px;
       right: 6px;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.62);
       color: #fff;
       font-size: 10px;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 3px 6px;
       border-radius: 999px;
+      backdrop-filter: blur(8px);
     }
     .grid-cap-mini {
       position: absolute;
-      bottom: 5px;
-      left: 5px;
-      right: 5px;
-      background: rgba(0, 0, 0, 0.58);
+      bottom: 6px;
+      left: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.56);
+      backdrop-filter: blur(8px);
       color: #fff;
       font-size: 10px;
       font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 8px;
+      padding: 3px 7px;
+      border-radius: 999px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -553,8 +666,8 @@
     .cal-card {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
-      border-radius: 26px;
-      padding: 14px;
+      border-radius: 28px;
+      padding: 16px;
       margin-bottom: 12px;
     }
     .cal-header {
@@ -585,17 +698,12 @@
       align-items: center;
       justify-content: center;
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.35);
+      color: rgba(255, 255, 255, 0.32);
       font-weight: 700;
       cursor: pointer;
     }
     .cal-cell.empty { background: transparent; cursor: default; }
-    .cal-cell img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .cal-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .cal-cell .cal-count {
       position: absolute;
       bottom: 2px;
@@ -609,9 +717,9 @@
     }
     .cal-stats-pill {
       margin: 6px auto 12px;
-      padding: 10px 18px;
+      padding: 10px 20px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.07);
       border: 1px solid var(--border);
       display: inline-flex;
       align-items: center;
@@ -620,58 +728,25 @@
       font-weight: 700;
     }
 
-    /* Bottom Floating Dock */
-    .bottom-dock {
-      position: fixed;
-      bottom: calc(12px + var(--safe-bottom));
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 40;
-      height: 58px;
-      padding: 6px;
-      border-radius: 999px;
-      background: rgba(30, 28, 25, 0.84);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
-    }
-    .dock-btn {
-      height: 44px;
-      padding: 0 13px;
-      border-radius: 999px;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s ease;
-    }
+    /* Chat Inbox */
     .chat-row {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 11px 12px;
-      border-radius: 20px;
-      background: var(--surface);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
       cursor: pointer;
+      transition: transform 0.14s var(--spring);
     }
-    .chat-row:active { transform: scale(0.985); }
+    .chat-row:active { transform: scale(0.98); }
     .chat-avt {
       width: 48px;
       height: 48px;
       border-radius: 999px;
       background: var(--surface-2);
-      border: 1.5px solid rgba(255,255,255,0.14);
+      border: 1.5px solid rgba(255, 255, 255, 0.14);
       overflow: hidden;
       flex-shrink: 0;
       display: flex;
@@ -694,20 +769,57 @@
       align-items: center;
       justify-content: center;
     }
+
+    /* Floating Glass Bottom Dock (4 Pure SVG Icons like Locket iOS) */
+    .bottom-dock {
+      position: fixed;
+      bottom: calc(12px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 40;
+      height: 56px;
+      padding: 5px;
+      border-radius: 999px;
+      background: rgba(34, 32, 29, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+    }
+    .dock-btn {
+      width: 54px;
+      height: 44px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.56);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s var(--spring);
+    }
+    .dock-btn svg.ico { width: 22px; height: 22px; }
     .dock-btn.active {
       background: rgba(255, 255, 255, 0.16);
       color: #fff;
+      width: 62px;
     }
     .dock-btn.cam-tab.active {
-      background: #fff;
+      background: rgba(255, 255, 255, 0.94);
       color: #111;
     }
 
-    /* Bottom Sheets & Modals */
+    /* Frosted Bottom Sheets (Matches Locket Video & LucianLabs smooth feel) */
     .sheet-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.58);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       z-index: 80;
       display: none;
       align-items: flex-end;
@@ -718,26 +830,28 @@
       width: 100%;
       max-width: 460px;
       max-height: 82dvh;
-      background: #1a1917;
-      border-top-left-radius: 28px;
-      border-top-right-radius: 28px;
+      background: rgba(26, 25, 23, 0.92);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border-top-left-radius: 32px;
+      border-top-right-radius: 32px;
       border-top: 1px solid rgba(255, 255, 255, 0.14);
-      padding: 12px 16px calc(22px + var(--safe-bottom));
+      padding: 10px 16px calc(22px + var(--safe-bottom));
       display: flex;
       flex-direction: column;
       gap: 12px;
       overflow: hidden;
-      animation: slideUp 0.2s ease-out;
+      animation: slideUp 0.26s var(--spring);
     }
     @keyframes slideUp {
-      from { transform: translateY(40px); opacity: 0; }
+      from { transform: translateY(60px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
     .sheet-handle {
-      width: 42px;
+      width: 40px;
       height: 4px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.26);
       margin: 0 auto 2px;
       flex-shrink: 0;
     }
@@ -748,16 +862,75 @@
       -webkit-overflow-scrolling: touch;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
+      padding-bottom: 8px;
     }
+    .fx-section-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 2px 2px 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .fx-hscroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+    }
+    .fx-hscroll::-webkit-scrollbar { display: none; }
+    .fx-tile {
+      flex-shrink: 0;
+      width: 76px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .fx-thumb {
+      width: 66px;
+      height: 66px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      overflow: hidden;
+      transition: transform 0.16s var(--spring), border-color 0.16s ease;
+    }
+    .fx-tile.active .fx-thumb {
+      border-color: var(--gold);
+      background: var(--gold-soft);
+      transform: scale(1.04);
+    }
+    .fx-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .fx-tile span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.2;
+      max-width: 74px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .fx-tile.active span { color: #fff; font-weight: 700; }
 
-    /* Common Inputs & Buttons */
+    /* Inputs & Buttons */
     .field-input {
       width: 100%;
-      background: #100f0e;
+      background: rgba(12, 11, 10, 0.88);
       border: 1px solid rgba(255, 255, 255, 0.14);
       color: #fff;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 11px 14px;
       font-size: 14px;
       outline: none;
@@ -776,23 +949,23 @@
       cursor: pointer;
     }
     .btn-secondary {
-      padding: 10px 14px;
+      padding: 9px 14px;
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: var(--surface-2);
+      background: rgba(255, 255, 255, 0.08);
       color: var(--text);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
     }
     .card-box {
-      background: var(--surface);
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 14px;
     }
     .preset-item {
-      padding: 10px 14px;
+      padding: 10px 16px;
       border-radius: 999px;
       font-size: 13px;
       font-weight: 700;
@@ -800,43 +973,14 @@
       align-items: center;
       gap: 8px;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       width: 100%;
       text-align: left;
     }
     .frame-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 8px;
-    }
-    .frame-card {
-      background: var(--surface-2);
-      border: 1.5px solid transparent;
-      border-radius: 14px;
-      padding: 6px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      text-align: center;
-    }
-    .frame-card.active { border-color: var(--gold); background: var(--gold-soft); }
-    .frame-card img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      border-radius: 10px;
-      background: #0e0e10;
-    }
-    .frame-card span {
-      font-size: 10px;
-      color: var(--text);
-      line-height: 1.2;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
 
     /* Toast */
@@ -844,10 +988,12 @@
       position: fixed;
       top: calc(14px + var(--safe-top));
       left: 50%;
-      transform: translateX(-50%) translateY(-20px);
+      transform: translateX(-50%) translateY(-24px);
       z-index: 120;
-      background: rgba(28, 28, 32, 0.94);
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(24, 24, 28, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       color: #fff;
       padding: 10px 18px;
       border-radius: 999px;
@@ -855,10 +1001,10 @@
       font-weight: 700;
       opacity: 0;
       pointer-events: none;
-      transition: all 0.2s ease;
-      max-width: 90vw;
+      transition: all 0.24s var(--spring);
+      max-width: 88vw;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
     }
     .toast-box.show {
       opacity: 1;
@@ -870,7 +1016,7 @@
       position: fixed;
       inset: 0;
       z-index: 100;
-      background: radial-gradient(circle at 50% 10%, #241e12 0%, #0b0a09 60%);
+      background: radial-gradient(circle at 50% 10%, #261f12 0%, #0b0a09 62%);
       display: none;
       flex-direction: column;
       align-items: center;
@@ -881,10 +1027,12 @@
     .login-card {
       width: 100%;
       max-width: 390px;
-      background: rgba(24, 23, 21, 0.92);
-      border: 1px solid rgba(245, 184, 0, 0.28);
-      border-radius: 28px;
-      padding: 22px;
+      background: rgba(24, 23, 21, 0.9);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(245, 184, 0, 0.26);
+      border-radius: 32px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -898,9 +1046,11 @@
   <div id="loginScreen" class="login-screen">
     <div class="login-card">
       <div style="text-align:center;">
-        <div style="font-size:34px;">💛</div>
-        <h2 style="margin:4px 0;font-size:20px;">Locket Gold Studio</h2>
-        <div style="font-size:12px;color:var(--gold);font-weight:700;">Bản Share • Cloudflare Pages</div>
+        <div style="width:52px;height:52px;margin:0 auto 8px;border-radius:16px;background:var(--gold-soft);border:1px solid rgba(245,184,0,0.4);display:flex;align-items:center;justify-content:center;color:var(--gold);">
+          <svg class="ico" style="width:26px;height:26px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
+        <h2 style="margin:0;font-size:20px;font-weight:800;">Locket Gold Studio</h2>
+        <div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:4px;">Bản Share • Cloudflare Pages</div>
       </div>
       <input id="loginEmail" class="field-input" type="email" placeholder="Email Locket của bạn..." autocomplete="email" />
       <input id="loginPass" class="field-input" type="password" placeholder="Mật khẩu..." autocomplete="current-password" />
@@ -914,107 +1064,168 @@
 
   <!-- MAIN APP -->
   <div class="app-shell">
-    <!-- Top Header -->
+    <!-- Top Bar -->
     <div class="top-bar">
-      <button id="btnTopTools" class="icon-circle" title="Công cụ & Giới hạn">📣</button>
-      <button id="btnTopTitle" class="pill-center">👥 <span id="friendCountLabel">0</span> người bạn</button>
-      <button id="btnTopAvatar" class="avatar-btn" title="Hồ sơ Locket Gold">💛</button>
+      <button id="btnTopTools" class="glass-circle" title="Thông tin & Admin">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      </button>
+      <button id="btnTopTitle" class="pill-center">
+        <svg class="ico" style="width:16px;height:16px;" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span><span id="friendCountLabel">0</span> người bạn</span>
+      </button>
+      <button id="btnTopAvatar" class="avatar-btn" title="Hồ sơ Locket Gold">
+        <svg class="ico" style="width:18px;height:18px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </button>
     </div>
 
     <!-- Main Stage -->
     <div class="main-stage">
       <!-- PANEL 1: CAMERA & SEND -->
       <div id="panelCam" class="view-panel active">
-        <!-- Live Camera Stage -->
         <div id="camStage" class="cam-stage">
+          <!-- Full-Bleed Square Viewfinder -->
           <div class="cam-box">
             <video id="camVideo" playsinline autoplay muted></video>
             <canvas id="camPreviewCanvas" width="720" height="720"></canvas>
             <img id="camFrameOverlay" alt="frame" />
-            <div class="cam-corner-tl">
-              <button id="btnDateStamp" class="cam-mini-pill" title="Đóng dấu ngày">'26</button>
-              <button id="btnBoothMode" class="cam-mini-pill" title="Chụp 1 tấm hoặc 2x2">1×1</button>
+
+            <!-- Top subtle pills -->
+            <div class="cam-top-controls">
+              <div class="cam-top-group">
+                <button id="btnDateStamp" class="cam-pill-mini" title="Dấu ngày máy phim">'26</button>
+                <button id="btnBoothMode" class="cam-pill-mini" title="Chụp 1 tấm hoặc Photobooth 2x2">1×1</button>
+              </div>
+              <div class="cam-top-group">
+                <button id="btnClearFrame" class="cam-pill-mini" style="display:none;">✕ Bỏ khung</button>
+              </div>
             </div>
-            <div class="cam-corner-tr">
-              <button id="btnClearFrame" class="cam-mini-pill" style="display:none;">✕ Khung</button>
+
+            <!-- Bottom inside viewfinder: Filter Carousel & 2 Corner Icons (Matches Locket Video) -->
+            <div class="cam-bottom-overlay">
+              <div id="activeFilterLabel" class="cam-filter-label">GỐC</div>
+
+              <div id="camInlineCarousel" class="cam-inline-carousel">
+                <button id="btnCloseInlineCarousel" class="cam-corner-icon" style="width:32px;height:32px;flex-shrink:0;">
+                  <svg class="ico" style="width:15px;height:15px;" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+                <div id="camCarouselScroll" class="cam-carousel-scroll"></div>
+              </div>
+
+              <div id="camCornerBar" class="cam-corner-bar">
+                <button id="btnToggleCamFilters" class="cam-corner-icon" title="Bộ lọc máy ảnh & gương">
+                  <svg class="ico" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                </button>
+                <button id="btnOpenFxDrawer" class="cam-corner-icon" title="Hiệu ứng & 231 Khung viền">
+                  <svg class="ico" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+                </button>
+              </div>
             </div>
+
             <div id="camCountdown" class="cam-countdown">3</div>
+            <div id="camProcessing" class="cam-processing">
+              <div class="processing-pill">
+                <svg class="ico" style="width:15px;height:15px;color:var(--gold);" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+                <span id="camProcessingText">ĐANG XỬ LÝ...</span>
+              </div>
+            </div>
             <div id="camNoPerm" class="cam-no-perm">
-              <div style="font-size:30px;">📷</div>
-              <div>Chưa cấp quyền Camera hoặc trình duyệt đang khóa.<br/>Bấm nút bên dưới để bật lại hoặc chọn ảnh từ thư viện.</div>
+              <svg class="ico" style="width:36px;height:36px;color:var(--gold);" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <div>Chưa bật Camera hoặc trình duyệt đang chặn.<br/>Bấm bật lại hoặc chọn ảnh/video từ thư viện.</div>
               <button id="btnRetryCam" class="btn-secondary">Bật lại Camera</button>
             </div>
           </div>
 
-          <!-- Filter Strip & Drawer Trigger OUTSIDE Camera -->
-          <div class="filter-strip-wrap">
-            <button id="btnOpenFxDrawer" class="drawer-trigger-btn">✨ Hiệu ứng</button>
-            <div id="quickFilterStrip" class="filter-strip"></div>
-          </div>
+          <!-- Clean 3-Button Shutter Row + History Pill -->
+          <div class="shutter-block">
+            <div class="shutter-row">
+              <label class="side-cam-btn" title="Chọn ảnh hoặc video (tự động nén < 5.5 MB)">
+                <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                <input id="filePickInput" type="file" accept="image/*,video/mp4,video/quicktime,video/webm" style="display:none;" />
+              </label>
 
-          <!-- Shutter Row OUTSIDE Camera -->
-          <div class="shutter-row">
-            <label class="side-cam-btn" title="Chọn ảnh hoặc video dưới 6MB">
-              🖼️
-              <input id="filePickInput" type="file" accept="image/*,video/mp4,video/quicktime,video/webm" style="display:none;" />
-            </label>
-            <button id="btnShutter" class="shutter-btn" title="Chụp ảnh">
-              <div id="shutterInner" class="shutter-inner"></div>
+              <button id="btnShutter" class="shutter-btn" title="Chụp ảnh">
+                <div class="shutter-inner"></div>
+              </button>
+
+              <button id="btnFlipCam" class="side-cam-btn" title="Đảo cam trước / sau">
+                <svg class="ico" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+              </button>
+            </div>
+
+            <button id="btnHistoryShortcut" class="history-shortcut">
+              <span class="history-badge" id="historyBadgeCount">•</span>
+              <span>Lịch sử</span>
+              <svg class="ico" style="width:15px;height:15px;" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
             </button>
-            <button id="btnFlipCam" class="side-cam-btn" title="Đảo cam trước / sau">🔄</button>
-          </div>
-          <div class="cam-hint-bar">
-            <span id="camModeHint">Cam trước soi & xuất gương chuẩn • Video gốc &lt; 6 MB</span>
           </div>
         </div>
 
         <!-- Post-Capture / Send Stage (Hidden until captured/picked) -->
         <div id="sendStage" class="send-stage">
-          <div style="width:100%;max-width:356px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;">
-            <span style="font-size:15px;font-weight:800;">Gửi đến...</span>
-            <button id="btnSaveLocal" class="btn-secondary" style="padding:6px 12px;font-size:12px;">⬇ Lưu ảnh</button>
+          <div class="send-top-row">
+            <span style="width:36px;"></span>
+            <span style="font-size:16px;font-weight:800;">Gửi đến...</span>
+            <button id="btnSaveLocal" class="glass-circle" style="width:36px;height:36px;" title="Lưu về máy">
+              <svg class="ico" style="width:18px;height:18px;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
           </div>
 
           <div class="send-preview-box">
             <img id="sendPreviewImg" alt="preview" style="display:none;" />
             <video id="sendPreviewVid" controls playsinline style="display:none;"></video>
+            <div id="sendProcessing" class="cam-processing">
+              <div class="processing-pill">
+                <svg class="ico" style="width:15px;height:15px;color:var(--gold);" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+                <span id="sendProcessingText">ĐANG RỬA ẢNH...</span>
+              </div>
+            </div>
             <button id="btnOpenCaptionSheet" class="caption-pill-overlay">
-              <span id="capPillIcon">💬</span>
+              <span id="capPillIcon"></span>
               <span id="capPillText">Thêm một tin nhắn</span>
             </button>
           </div>
 
           <!-- Action Row -->
           <div class="send-actions-row">
-            <button id="btnCancelSend" class="icon-circle" style="width:52px;height:52px;font-size:20px;" title="Chụp lại">✕</button>
-            <button id="btnPublishLocket" class="send-circle-btn" title="Đăng lên Locket">➤</button>
-            <button id="btnAiWash" class="ai-wash-btn" title="Rửa ảnh AI">✨ AI (<span id="aiQuotaBadge">2/2</span>)</button>
+            <button id="btnCancelSend" class="side-cam-btn" title="Chụp lại">
+              <svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+            <button id="btnPublishLocket" class="send-circle-btn" title="Đăng lên Locket">
+              <svg class="ico" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+            <button id="btnAiWash" class="ai-wash-pill" title="Rửa ảnh AI">
+              <svg class="ico" style="width:15px;height:15px;" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+              <span id="aiQuotaBadge">2/2</span>
+            </button>
           </div>
 
-          <!-- Friends Horizontal Strip -->
           <div id="friendsStrip" class="friends-strip"></div>
         </div>
       </div>
 
-      <!-- PANEL 2: GRID (IMG_2577) -->
+      <!-- PANEL 2: GRID -->
       <div id="panelGrid" class="view-panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <span style="font-size:15px;font-weight:800;">🖼️ Lưới khoảnh khắc</span>
-          <button id="btnReloadGrid" class="btn-secondary" style="padding:6px 12px;font-size:12px;">🔄 Tải lại</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px;">
+          <span style="font-size:16px;font-weight:800;">Lịch sử</span>
+          <button id="btnReloadGrid" class="btn-secondary">Tải lại</button>
         </div>
         <div id="gridContainer" class="grid-3col"></div>
         <button id="btnLoadMoreGrid" class="btn-secondary" style="margin:14px auto;display:none;">Xem thêm ảnh cũ</button>
       </div>
 
-      <!-- PANEL 3: CALENDAR (IMG_2578) -->
+      <!-- PANEL 3: CALENDAR -->
       <div id="panelCal" class="view-panel">
         <div class="cal-card">
           <div class="cal-header">
-            <button id="btnCalPrev" class="icon-circle" style="width:34px;height:34px;font-size:14px;">◀</button>
+            <button id="btnCalPrev" class="glass-circle" style="width:34px;height:34px;">
+              <svg class="ico" style="width:16px;height:16px;" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
             <div id="calMonthTitle" style="font-size:16px;font-weight:800;">tháng 11 2026</div>
-            <button id="btnCalNext" class="icon-circle" style="width:34px;height:34px;font-size:14px;">▶</button>
+            <button id="btnCalNext" class="glass-circle" style="width:34px;height:34px;">
+              <svg class="ico" style="width:16px;height:16px;" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
           </div>
-          <div class="cal-grid" id="calDowRow">
+          <div class="cal-grid">
             <div class="cal-dow">T2</div><div class="cal-dow">T3</div><div class="cal-dow">T4</div>
             <div class="cal-dow">T5</div><div class="cal-dow">T6</div><div class="cal-dow">T7</div><div class="cal-dow">CN</div>
           </div>
@@ -1028,39 +1239,39 @@
           </div>
         </div>
         <div class="card-box" style="display:flex;flex-direction:column;gap:8px;">
-          <div style="font-size:13px;font-weight:800;">🩹 Phục hồi chuỗi ngày lỡ</div>
+          <div style="font-size:13px;font-weight:800;">Phục hồi chuỗi ngày lỡ</div>
           <div style="display:flex;gap:8px;">
             <input id="streakDateInput" type="date" class="field-input" style="flex:1;padding:8px 12px;" />
-            <button id="btnSetRecoveryDate" class="btn-secondary">Gắn ngày vào ảnh tiếp theo</button>
+            <button id="btnSetRecoveryDate" class="btn-secondary">Gắn ngày</button>
           </div>
           <div id="recoveryBadge" style="font-size:12px;color:var(--gold);display:none;"></div>
         </div>
       </div>
 
-      <!-- PANEL 3B: CHAT INBOX (Firestore conversations) -->
+      <!-- PANEL 3B: CHAT INBOX -->
       <div id="panelChat" class="view-panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <span style="font-size:15px;font-weight:800;">💬 Hộp thư Locket</span>
-          <button id="btnReloadChat" class="btn-secondary" style="padding:6px 12px;font-size:12px;">🔄 Tải lại</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px;">
+          <span style="font-size:16px;font-weight:800;">Tin nhắn</span>
+          <button id="btnReloadChat" class="btn-secondary">Tải lại</button>
         </div>
         <div id="chatListContainer" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
 
-      <!-- PANEL 4: PROFILE / LOCKET GOLD (DA1A01BB) -->
+      <!-- PANEL 4: PROFILE -->
       <div id="panelProfile" class="view-panel">
         <div class="card-box" style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">
-          <div style="font-size:11px;font-weight:900;letter-spacing:1px;color:var(--gold);background:var(--gold-soft);padding:4px 12px;border-radius:999px;">💛 LOCKET GOLD • SHARE EDITION</div>
-          <div id="profAvatarBig" class="avatar-btn" style="width:76px;height:76px;font-size:28px;">💛</div>
-          <div id="profNameLabel" style="font-size:19px;font-weight:800;">Người dùng Locket</div>
+          <div style="font-size:11px;font-weight:900;letter-spacing:1px;color:var(--gold);background:var(--gold-soft);padding:5px 14px;border-radius:999px;">LOCKET GOLD • SHARE EDITION</div>
+          <div id="profAvatarBig" class="avatar-btn" style="width:80px;height:80px;">💛</div>
+          <div id="profNameLabel" style="font-size:20px;font-weight:800;">Người dùng Locket</div>
           <div id="profEmailLabel" style="font-size:12px;color:var(--muted);"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
-            <span class="cam-mini-pill">👥 <span id="profFriendCount">0</span> bạn bè</span>
-            <span class="cam-mini-pill">✨ AI hôm nay: <span id="profAiQuota">2/2</span></span>
+            <span class="cam-pill-mini"><span id="profFriendCount">0</span> người bạn</span>
+            <span class="cam-pill-mini">AI hôm nay: <span id="profAiQuota">2/2</span></span>
           </div>
         </div>
 
         <div class="card-box" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
-          <div style="font-size:14px;font-weight:800;">🔐 Mở khóa giới hạn (Admin PIN)</div>
+          <div style="font-size:14px;font-weight:800;">Mở khóa giới hạn (Admin PIN)</div>
           <div style="display:flex;gap:8px;">
             <input id="adminPinInput" type="password" class="field-input" placeholder="Nhập mã PIN Admin..." style="flex:1;" />
             <button id="btnUnlockAdmin" class="btn-secondary">Mở khóa</button>
@@ -1068,33 +1279,38 @@
           <div id="adminStatusLabel" style="font-size:12px;color:var(--muted);">Bản Share mặc định giới hạn 2 lượt Rửa ảnh AI / ngày.</div>
         </div>
 
-        <div class="card-box" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
-          <button id="btnLogout" class="btn-secondary" style="color:var(--danger);border-color:rgba(255,69,58,0.35);">🚪 Đăng xuất tài khoản</button>
+        <div class="card-box" style="margin-top:12px;">
+          <button id="btnLogout" class="btn-secondary" style="width:100%;color:var(--danger);border-color:rgba(255,69,58,0.35);padding:12px;">Đăng xuất tài khoản</button>
         </div>
       </div>
     </div>
 
-    <!-- Bottom Floating Dock -->
+    <!-- Bottom Floating Dock (Pure iOS SVG Icons) -->
     <div class="bottom-dock">
-      <button id="dockCal" class="dock-btn" data-tab="cal">📅 Lịch</button>
-      <button id="dockCam" class="dock-btn cam-tab active" data-tab="cam">🏠 Cam</button>
-      <button id="dockGrid" class="dock-btn" data-tab="grid">⊞ Lưới</button>
-      <button id="dockChat" class="dock-btn" data-tab="chat">💬 Chat</button>
+      <button id="dockCal" class="dock-btn" data-tab="cal" title="Kỷ niệm / Lịch">
+        <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="4"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </button>
+      <button id="dockCam" class="dock-btn cam-tab active" data-tab="cam" title="Camera">
+        <svg class="ico" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <button id="dockGrid" class="dock-btn" data-tab="grid" title="Lưới khoảnh khắc">
+        <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>
+      </button>
+      <button id="dockChat" class="dock-btn" data-tab="chat" title="Tin nhắn">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      </button>
     </div>
   </div>
 
-  <!-- BOTTOM SHEET: EFFECTS & FRAMES DRAWER -->
+  <!-- BOTTOM SHEET: EFFECTS & 231 FRAMES (Exact Locket Video Categorized Sheet) -->
   <div id="fxDrawerSheet" class="sheet-backdrop">
     <div class="sheet-panel">
       <div class="sheet-handle"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:16px;font-weight:800;">✨ Bộ lọc, Gương & Khung</span>
-        <button id="btnCloseFxDrawer" class="btn-secondary" style="padding:5px 12px;font-size:12px;">Xong</button>
+        <span style="font-size:16px;font-weight:800;">Hiệu ứng & Khung viền</span>
+        <button id="btnCloseFxDrawer" class="btn-secondary">Xong</button>
       </div>
-      <div style="display:flex;gap:6px;">
-        <button id="fxTabFilters" class="filter-chip active" style="flex:1;justify-content:center;">📷 16 Bộ lọc & Gương</button>
-        <button id="fxTabFrames" class="filter-chip" style="flex:1;justify-content:center;">🖼️ Khung viền (231)</button>
-      </div>
+      <input id="fxFrameSearch" class="field-input" style="padding:9px 14px;font-size:13px;" placeholder="Tìm 231 khung viền (Shin, Hello Kitty, Idol, Spotify...)" />
       <div id="fxDrawerBody" class="sheet-scroll"></div>
     </div>
   </div>
@@ -1104,46 +1320,44 @@
     <div class="sheet-panel">
       <div class="sheet-handle"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:16px;font-weight:800;">💬 Chú thích Locket</span>
-        <button id="btnCloseCaptionSheet" class="btn-primary" style="width:auto;padding:7px 16px;font-size:13px;">Áp dụng</button>
+        <span style="font-size:16px;font-weight:800;">Chú thích</span>
+        <button id="btnCloseCaptionSheet" class="btn-primary" style="width:auto;padding:8px 18px;font-size:13px;">Áp dụng</button>
       </div>
       <div style="display:flex;gap:6px;align-items:center;">
-        <input id="musicLinkInput" class="field-input" style="flex:1;padding:9px 12px;font-size:13px;" placeholder="🎵 Dán link Spotify / Apple Music..." />
-        <button id="btnFetchMusic" class="btn-secondary" style="padding:9px 12px;font-size:12px;white-space:nowrap;">Lấy nhạc</button>
+        <input id="musicLinkInput" class="field-input" style="flex:1;padding:9px 12px;font-size:13px;" placeholder="Dán link Spotify / Apple Music để kéo nhạc..." />
+        <button id="btnFetchMusic" class="btn-secondary" style="white-space:nowrap;">Lấy nhạc</button>
       </div>
-      <div id="musicMetaPreview" style="display:none;align-items:center;gap:10px;background:#121215;border:1px solid rgba(29,185,84,0.45);border-radius:14px;padding:8px 10px;">
-        <img id="musicMetaCover" alt="cover" style="width:38px;height:38px;border-radius:8px;object-fit:cover;" />
+      <div id="musicMetaPreview" style="display:none;align-items:center;gap:10px;background:#121215;border:1px solid rgba(29,185,84,0.45);border-radius:16px;padding:8px 10px;">
+        <img id="musicMetaCover" alt="cover" style="width:40px;height:40px;border-radius:10px;object-fit:cover;" />
         <div style="flex:1;min-width:0;">
           <div id="musicMetaTitle" style="font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
           <div id="musicMetaArtist" style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
         </div>
-        <button id="btnClearMusicMeta" class="btn-secondary" style="padding:4px 8px;font-size:11px;">✕</button>
+        <button id="btnClearMusicMeta" class="btn-secondary" style="padding:4px 9px;">✕</button>
       </div>
       <textarea id="capTextInput" class="field-input" rows="2" placeholder="Nhập chú thích (hỗ trợ xuống dòng)..."></textarea>
       <div style="display:flex;gap:8px;align-items:center;">
-        <input id="capIconInput" class="field-input" style="width:90px;" placeholder="Icon 🔥" />
-        <input id="capSearchInput" class="field-input" style="flex:1;" placeholder="Tìm 150 mẫu màu..." />
+        <input id="capIconInput" class="field-input" style="width:86px;padding:9px 12px;" placeholder="Icon" />
+        <input id="capSearchInput" class="field-input" style="flex:1;padding:9px 12px;" placeholder="Tìm 150 mẫu chú thích..." />
       </div>
-      <div id="capExtraFields" style="display:none;flex-direction:column;gap:8px;"></div>
       <div id="capPresetsList" class="sheet-scroll"></div>
     </div>
   </div>
 
-  <!-- BOTTOM SHEET: SINGLE MOMENT VIEWER (IMG_2576) -->
+  <!-- BOTTOM SHEET: SINGLE MOMENT VIEWER -->
   <div id="momentViewerSheet" class="sheet-backdrop">
     <div class="sheet-panel" style="max-height:90dvh;">
       <div class="sheet-handle"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div id="viewerAuthor" style="font-size:14px;font-weight:800;">Khoảnh khắc</div>
-        <button id="btnCloseViewer" class="btn-secondary" style="padding:5px 12px;font-size:12px;">Đóng</button>
+        <div id="viewerAuthor" style="font-size:15px;font-weight:800;">Khoảnh khắc</div>
+        <button id="btnCloseViewer" class="btn-secondary">Đóng</button>
       </div>
       <div class="sheet-scroll" style="align-items:center;">
-        <div class="send-preview-box" style="width:min(80vw, 310px);flex-shrink:0;">
+        <div class="send-preview-box" style="width:min(82vw, 316px);height:min(82vw, 316px);border-radius:36px;">
           <img id="viewerImg" alt="moment" />
           <div id="viewerCapBadge" class="caption-pill-overlay" style="display:none;cursor:default;"></div>
         </div>
         <div id="viewerViewsBox" style="width:100%;font-size:12px;color:var(--muted);text-align:center;">Đang tải lượt xem...</div>
-        <!-- Quick Reactions -->
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;width:100%;">
           <button class="btn-secondary react-quick-btn" data-emoji="💛">💛</button>
           <button class="btn-secondary react-quick-btn" data-emoji="❤️">❤️</button>
@@ -1151,10 +1365,9 @@
           <button class="btn-secondary react-quick-btn" data-emoji="😂">😂</button>
           <button class="btn-secondary react-quick-btn" data-emoji="🥹">🥹</button>
         </div>
-        <!-- 1-way Chat Message (sendChatMessageV2) -->
         <div id="viewerChatRow" style="display:flex;gap:8px;width:100%;margin-top:4px;">
-          <input id="viewerChatInput" class="field-input" placeholder="Gửi tin nhắn tới người đăng..." style="flex:1;" />
-          <button id="btnSendViewerChat" class="btn-primary" style="width:auto;padding:0 16px;">Gửi</button>
+          <input id="viewerChatInput" class="field-input" placeholder="Gửi tin nhắn..." style="flex:1;" />
+          <button id="btnSendViewerChat" class="btn-primary" style="width:auto;padding:0 18px;">Gửi</button>
         </div>
       </div>
     </div>
@@ -1166,7 +1379,7 @@
       <div class="sheet-handle"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div id="chatReplyTitle" style="font-size:15px;font-weight:800;">Trò chuyện</div>
-        <button id="btnCloseChatReply" class="btn-secondary" style="padding:5px 12px;font-size:12px;">Đóng</button>
+        <button id="btnCloseChatReply" class="btn-secondary">Đóng</button>
       </div>
       <div id="chatReplyBody" class="card-box" style="display:flex;flex-direction:column;gap:8px;font-size:13px;"></div>
       <div style="display:flex;gap:8px;">
@@ -1181,18 +1394,15 @@
     <div class="sheet-panel">
       <div class="sheet-handle"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:16px;font-weight:800;">✨ Rửa ảnh AI (Giữ nguyên mặt)</span>
-        <button id="btnCloseAiSheet" class="btn-secondary" style="padding:5px 12px;font-size:12px;">Đóng</button>
+        <span style="font-size:16px;font-weight:800;">Rửa ảnh AI (Giữ nguyên mặt)</span>
+        <button id="btnCloseAiSheet" class="btn-secondary">Đóng</button>
       </div>
-      <input id="aiCustomPrompt" class="field-input" placeholder="Hoặc tự nhập mô tả hiệu ứng (tiếng Việt/Anh)..." />
+      <input id="aiCustomPrompt" class="field-input" placeholder="Hoặc tự nhập mô tả hiệu ứng..." />
       <div id="aiPresetList" class="sheet-scroll"></div>
     </div>
   </div>
 
   <script>
-    // =========================================================================
-    // CONFIG & EMBEDDED DATA (SHARE EDITION - HARDENED FOR PUBLIC)
-    // =========================================================================
     const WORKER_URL = "https://weathered-wave-12cc.noobnopro2007.workers.dev";
     const ADMIN_PIN = "dzvcl";
     const DAILY_AI_LIMIT = 2;
@@ -1204,23 +1414,23 @@
     const FRAMES_DATA = [{"id": "none_dark", "name": "🖤 Khung Đen Hàn Quốc (Tự ghép 2×2)", "category": "Cơ bản", "url": null, "bg": "#111115"}, {"id": "none_white", "name": "🤍 Khung Trắng Hàn Quốc (Tự ghép 2×2)", "category": "Cơ bản", "url": null, "bg": "#FAF8F5"}, {"id": "shin_starry", "name": "🖍️ Shin-chan Vàng Pastel (2×2)", "category": "Âm nhạc & Pastel", "url": "https://i.ibb.co/M5ykBwLY/Starry-night-photobooth-frame-overlay-10-Nov-2026-1-44-am.png", "bg": "#FAF8F5"}, {"id": "spotify_glass", "name": "🎵 Spotify Kính Mờ Viền Trắng (1 ô)", "category": "Âm nhạc & Pastel", "url": "https://i.ibb.co/Kj9K9KB7/IMG-1859.jpg", "bg": "#09090B"}, {"id": "yellow_checker", "name": "💛 Vàng Checkerboard Năng Động (2×2)", "category": "Cá tính & Y2K", "url": "https://i.ibb.co/8D1zQZZ4/IMG-1855.jpg", "bg": "#FAF8F5"}, {"id": "y2k_holo", "name": "💿 Y2K Giấy Xé Hologram (2×2)", "category": "Cá tính & Y2K", "url": "https://i.ibb.co/35QkN6hR/IMG-1856.jpg", "bg": "#E4E4E7"}, {"id": "pink_pastel_bear", "name": "🍓 Hồng Pastel Dâu Tây & Gấu Bông (2×2)", "category": "Âm nhạc & Pastel", "url": "https://i.ibb.co/rKFk754w/IMG-1857.jpg", "bg": "#FFF1F2"}, {"id": "starry_night_gold", "name": "🌙 Đêm Trăng Sao Vàng Gold (2×2)", "category": "Cá tính & Y2K", "url": "https://i.ibb.co/WNVWHcdh/IMG-1858.jpg", "bg": "#09090B"}, {"id": "birthday_pastel_1slot", "name": "🎂 Sinh Nhật Pastel Bánh Dâu (1 ô)", "category": "Sinh nhật", "url": "https://i.ibb.co/pmDFvH8/IMG-1866.jpg", "bg": "#FFF1F2"}, {"id": "birthday_pastel_2x2", "name": "🥳 Sinh Nhật Pastel Bóng Bay (2×2)", "category": "Sinh nhật", "url": "https://i.ibb.co/v4HHC7kQ/IMG-1865.jpg", "bg": "#FAF8F5"}, {"id": "xmas_kitty_1slot", "name": "🎄 Merry Christmas Kem Đỏ Đô (1 ô)", "category": "Mùa đông & Noel", "url": "https://i.ibb.co/Sw2CY7D4/IMG-1922.jpg", "bg": "#F8F1E9"}, {"id": "xmas_kitty_2x2", "name": "🎅 Merry Christmas Kem Đỏ Đô (2×2)", "category": "Mùa đông & Noel", "url": "https://i.ibb.co/d0yGgZfT/IMG-1923.jpg", "bg": "#F8F1E9"}, {"id": "winter_ice_1slot", "name": "❄️ Hello Winter Băng Giá (1 ô)", "category": "Mùa đông & Noel", "url": "https://i.ibb.co/JRkLpB8f/IMG-1929.jpg", "bg": "#E0F2FE"}, {"id": "winter_ice_2x2", "name": "⛄ Hello Winter Băng Giá (2×2)", "category": "Mùa đông & Noel", "url": "https://i.ibb.co/p6bxLdvj/IMG-1925.jpg", "bg": "#E0F2FE"}, {"id": "mens_day_1911_1", "name": "👦🐶 19/11 Shin-chan & Bạch Tuyết (1 Ô)", "category": "Shin-chan", "url": "https://i.ibb.co/HDfpKFVz/IMG-2084.jpg", "bg": "#BAE0F8"}, {"id": "mens_day_1911_2x2", "name": "👦🐶 19/11 Shin-chan & Bạch Tuyết (2×2)", "category": "Shin-chan", "url": "https://i.ibb.co/PsbMNnGm/IMG-2085.jpg", "bg": "#BAE0F8"}, {"id": "mens_day_1911_2x3", "name": "👦🐶 19/11 Shin-chan & Bạch Tuyết (2×3 Dọc)", "category": "Shin-chan", "url": "https://i.ibb.co/TD1fVH1G/IMG-2086.jpg", "bg": "#BAE0F8"}, {"id": "pb_khung4_merry_christmas", "name": "🎄 Thư Giáng Sinh (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/YF00nDj6/pb-khung4-merry-christmas.png", "bg": "#202020"}, {"id": "pb_khung4_christmas_palette", "name": "❄️ Giáng Sinh Tuyết Xanh (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/SXTc7j3j/pb-khung4-christmas-palette.png", "bg": "#426E89"}, {"id": "pb_khung4_happy_birthday", "name": "🎂 Sinh Nhật Y2K (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/DfqT9Gvx/pb-khung4-happy-birthday.png", "bg": "#242424"}, {"id": "pb_khung4_shin1", "name": "🖍️ Shin Xanh Tinh Nghịch (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/qMXzLW0m/pb-khung4-shin1.png", "bg": "#279ED6"}, {"id": "pb_khung4_shin2", "name": "🖍️ Shin Hồng Dễ Thương (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/SX37qV42/pb-khung4-shin2.png", "bg": "#ED75B1"}, {"id": "pb_khung4_shin3", "name": "🖍️ Shin Cam Năng Động (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/C5wvqhPD/pb-khung4-shin3.png", "bg": "#EF6217"}, {"id": "pb_khung4_smile", "name": "😊 Smile! (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/JFFfmYFH/pb-khung4-smile.png", "bg": "#252525"}, {"id": "pb_khung4_scrapbook_do", "name": "📕 Scrapbook Đỏ (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/6cnQVdCQ/pb-khung4-scrapbook-do.png", "bg": "#671C2A"}, {"id": "pb_khung4_inspire_arena", "name": "🎵 Inspire Arena (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/DPc6g4Ly/pb-khung4-inspire-arena.png", "bg": "#267BB5"}, {"id": "pb_khung4_my_vault", "name": "⚡ My Vault (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/27mkQp7C/pb-khung4-my-vault.png", "bg": "#292929"}, {"id": "pb_khung4_cham_bi", "name": "🔴 Chấm Bi (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/cKGFdKSp/pb-khung4-cham-bi.png", "bg": "#694A4B"}, {"id": "pb_khung4_cham_bi_den", "name": "⚫ Chấm Bi Đen (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/zVBL0hh6/pb-khung4-cham-bi-den.png", "bg": "#242424"}, {"id": "pb_khung4_likeble", "name": "💛 Likeble (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/xKYkHGmF/pb-khung4-likeble.png", "bg": "#B39C57"}, {"id": "pb_khung4_razzle", "name": "📸 Razzle Dazzle (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/ZpdY2H71/pb-khung4-razzle.png", "bg": "#806044"}, {"id": "pb_khung4_your_title", "name": "📰 Your Title (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/35TDrj7n/pb-khung4-your-title.png", "bg": "#60462D"}, {"id": "pb_khung4_soulmate_film", "name": "🎞️ Soulmate Film (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/C3cyySQR/pb-khung4-soulmate-film.png", "bg": "#8C2937"}, {"id": "pb_khung4_mimi", "name": "📸 Mimi Say Cheese (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/sJHFq9j9/pb-khung4-mimi.png", "bg": "#5D8DBA"}, {"id": "pb_khung4_fairy_film", "name": "🧚 Fairy Film (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/BHrQGyPf/pb-khung4-fairy-film.png", "bg": "#344F7B"}, {"id": "pb_khung4_foto_lush", "name": "📷 Foto Lush (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/vx6CdPYc/pb-khung4-foto-lush.png", "bg": "#6F6A63"}, {"id": "pb_khung4_photoism", "name": "📷 Photoism (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/bg1Dw53w/pb-khung4-photoism.png", "bg": "#242424"}, {"id": "pb_khung4_twinkle_booth", "name": "⭐ Twinkle Booth (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/fh9wYNX/pb-khung4-twinkle-booth.png", "bg": "#674323"}, {"id": "pb_khung4_equinox", "name": "🎞️ Equinox Studio (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/gZhnjZ7V/pb-khung4-equinox.png", "bg": "#174C9B"}, {"id": "pb_khung4_i_love_you", "name": "💌 I Love You (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/Z1fb9Yh5/pb-khung4-i-love-you.png", "bg": "#795D3D"}, {"id": "pb_khung4_film", "name": "🎞️ Cuộn Phim 35mm (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/whHGH0MK/pb-khung4-film.png", "bg": "#1C1C1C"}, {"id": "pb_khung4_dream_cream", "name": "🧥 Denim & Kem (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/mCnq1mMS/pb-khung4-dream-cream.png", "bg": "#405978"}, {"id": "pb_khung4_scrapbook", "name": "📒 Scrapbook Kỷ Niệm (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/tTJdynGR/pb-khung4-scrapbook.png", "bg": "#C9B08A"}, {"id": "pb_khung4_so_cool", "name": "🩷 So Cool (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/FqKGm5qJ/pb-khung4-so-cool.png", "bg": "#D85C9A"}, {"id": "pb_khung4_berry_days", "name": "🍓 Berry Days (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/7dbRpNJX/pb-khung4-berry-days.png", "bg": "#FFB6C1"}, {"id": "pb_khung4_happy_snap", "name": "💜 Happy Snap (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/pBjNNLqC/pb-khung4-happy-snap.png", "bg": "#5F5098"}, {"id": "pb_khung4_sky_diary", "name": "☁️ Sky Diary (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/bjqY3RKJ/pb-khung4-sky-diary.png", "bg": "#73815B"}, {"id": "pb_khung4_4cut", "name": "🎀 Photobooth 4 ô", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/hxppY9Lp/pb-khung4-4cut.png", "bg": "#FFD6E0"}, {"id": "pb_khung4_holo_4cut", "name": "💿 Photobooth Y2K Holo (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/JFQQGLpm/pb-khung4-holo-4cut.png", "bg": "#C4B5FD"}, {"id": "pb_khung4_scrapbook_ripped_4cut", "name": "📜 Photobooth Scrapbook (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/gLBgvDvc/pb-khung4-scrapbook-ripped-4cut.png", "bg": "#D6A36A"}, {"id": "pb_khung4_ripped_paper_4cut", "name": "📄 Photobooth Ripped Paper (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/fwX2kqn/pb-khung4-ripped-paper-4cut.png", "bg": "#8D2424"}, {"id": "pb_khung4_denim_ripped_2x2", "name": "👖 Photobooth Denim 4 ô", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/pvhMQFqf/pb-khung4-denim-ripped-2x2.png", "bg": "#315574"}, {"id": "pb_khung4_dem_day_sao", "name": "🌌 Đêm Đầy Sao (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/mL95gjC/pb-khung4-dem-day-sao.png", "bg": "#204C9A"}, {"id": "pb_khung4_vit_da_ngoai", "name": "🦆 Vịt Đi Dã Ngoại (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/nN6103DG/pb-khung4-vit-da-ngoai.png", "bg": "#E5B35B"}, {"id": "pb_khung4_bo_xanh", "name": "🥑 Bơ Xanh Mơ Màng (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/gLc8TZwf/pb-khung4-bo-xanh.png", "bg": "#99B65A"}, {"id": "pb_khung4_snoopy", "name": "🐶 Snoopy & Bạn Bè (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/LXxNrSWy/pb-khung4-snoopy.png", "bg": "#556D80"}, {"id": "pb_khung4_hoi_ban_hoat_hinh", "name": "🎨 Hội Bạn Hoạt Hình (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/sJRdg8vh/pb-khung4-hoi-ban-hoat-hinh.png", "bg": "#EEA5BB"}, {"id": "pb_khung4_khung_long_pastel", "name": "🦖 Khủng Long Pastel (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/b80KZ2r/pb-khung4-khung-long-pastel.png", "bg": "#B99ED8"}, {"id": "pb_khung4_bt21_tim", "name": "💜 BT21 Disco Tím (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/WNH28JC3/pb-khung4-bt21-tim.png", "bg": "#9F85DC"}, {"id": "pb_khung4_gau_cookie", "name": "🍪 Gấu Bánh Cookie (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/KcWGRbgf/pb-khung4-gau-cookie.png", "bg": "#B9793E"}, {"id": "pb_khung4_capybara_tra_sua", "name": "🧋 Capybara Trà Sữa (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/MKRWvmk/pb-khung4-capybara-tra-sua.png", "bg": "#BD8969"}, {"id": "pb_khung4_pudding_vang", "name": "🍮 Tiệm Pudding Vàng (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/hJCbLyLh/pb-khung4-pudding-vang.png", "bg": "#D6A447"}, {"id": "pb_khung4_meo_tiem_banh", "name": "🥐 Tiệm Bánh Mèo Mơ (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/ync3BpkT/pb-khung4-meo-tiem-banh.png", "bg": "#DC9971"}, {"id": "pb_khung4_cinnamoroll_may_xanh", "name": "☁️ Cinnamoroll Mây Xanh (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/yBh25xPx/pb-khung4-cinnamoroll-may-xanh.png", "bg": "#75B6DF"}, {"id": "pb_khung4_minions", "name": "🍌 Minions Tinh Nghịch (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/bR1fJD0y/pb-khung4-minions.png", "bg": "#E5C545"}, {"id": "pb_khung4_tiem_banh_mat_ong", "name": "🍯 Tiệm Bánh Mật Ong (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/gZDMzLDT/pb-khung4-tiem-banh-mat-ong.png", "bg": "#D79D52"}, {"id": "pb_khung4_totoro_rung_xanh", "name": "🌿 Totoro Rừng Xanh (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/tPCXrzN5/pb-khung4-totoro-rung-xanh.png", "bg": "#8EAA61"}, {"id": "pb_khung4_kuromi_no_tim", "name": "🖤 Kuromi Nơ Tím (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/cKSc7sw5/pb-khung4-kuromi-no-tim.png", "bg": "#8B64A1"}, {"id": "pb_khung4_cho_vang_cau_vong", "name": "🌈 Cún Vàng Cầu Vồng (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/Lh9qXCC9/pb-khung4-cho-vang-cau-vong.png", "bg": "#D4B74C"}, {"id": "pb_khung4_conan_trinh_tham", "name": "🔍 Conan Thám Tử Nhí (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/dsTmhh0d/pb-khung4-conan-trinh-tham.png", "bg": "#274C82"}, {"id": "pb_khung4_tho_dau_tay", "name": "🍓 Thỏ Dâu Tây (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/W4YZVHZW/pb-khung4-tho-dau-tay.png", "bg": "#DF8CA2"}, {"id": "pb_khung4_cinnamoroll_thien_than", "name": "👼 Cinnamoroll Thiên Thần (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/4R5c4s7y/pb-khung4-cinnamoroll-thien-than.png", "bg": "#E6A1C7"}, {"id": "pb_khung4_bt21_do", "name": "❤️ BT21 Rực Rỡ (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/vvY4RYsS/pb-khung4-bt21-do.png", "bg": "#DB5260"}, {"id": "pb_khung4_capybara_ca_phe", "name": "☕ Capybara Tiệm Cà Phê (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/60jQ2f3f/pb-khung4-capybara-ca-phe.png", "bg": "#AF805D"}, {"id": "pb_khung4_my_melody_hong", "name": "🎀 My Melody Hồng (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/Pv8yJvcp/pb-khung4-my-melody-hong.png", "bg": "#DC84AD"}, {"id": "pb_khung4_loopy_tra_sua", "name": "🧋 Loopy Trà Sữa (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/bjt3cQ70/pb-khung4-loopy-tra-sua.png", "bg": "#D991AB"}, {"id": "pb_khung4_koala_may_xanh", "name": "🐨 Koala Ngủ Trên Mây (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/RknLZ8Sf/pb-khung4-koala-may-xanh.png", "bg": "#8FAFD7"}, {"id": "pb_khung4_totoro", "name": "🌱 Totoro Khu Vườn Nhỏ (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/bMP3vp4d/pb-khung4-totoro.png", "bg": "#91A766"}, {"id": "pb_khung4_kuromi_tim", "name": "💜 Kuromi Tím Mộng Mơ (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/wNMKRFpn/pb-khung4-kuromi-tim.png", "bg": "#A377C2"}, {"id": "pb_khung4_gau_ngu_trang_sao", "name": "🌙 Gấu Ngủ Trăng Sao (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/1GpMwDVm/pb-khung4-gau-ngu-trang-sao.png", "bg": "#A899D6"}, {"id": "pb_khung4_bt21_party", "name": "🎉 BT21 Party (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/Y4JGdtRB/pb-khung4-bt21-party.png", "bg": "#BE88C0"}, {"id": "pb_khung4_scrapbook_xanh", "name": "📘 Scrapbook Xanh Dịu (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/xK7ybYPr/pb-khung4-scrapbook-xanh.png", "bg": "#9DAEC9"}, {"id": "pb_khung4_vit_vuon_hoa", "name": "🌼 Vịt Trong Vườn Hoa (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/MxSWVFWS/pb-khung4-vit-vuon-hoa.png", "bg": "#A8C576"}, {"id": "pb_khung4_bts", "name": "💜 BTS Tím Yêu Thương (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/rGvvfDv4/pb-khung4-bts.png", "bg": "#A67AD1"}, {"id": "pb_khung4_conan", "name": "🕵️ Conan Phá Án (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/4nYH8Mvr/pb-khung4-conan.png", "bg": "#28578C"}, {"id": "pb_khung4_cortis", "name": "🩵 CORTIS Xanh Thanh Xuân (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/Vp0QWcj7/pb-khung4-cortis.png", "bg": "#9AB7DB"}, {"id": "pb_khung4_doraemon", "name": "🔔 Doraemon & Hội Bạn (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/kVKFrSc4/pb-khung4-doraemon.png", "bg": "#62ACDB"}, {"id": "pb_khung4_dragon_ball", "name": "🐉 Dragon Ball Bùng Nổ (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/zWfhzwzL/pb-khung4-dragon-ball.png", "bg": "#E49C36"}, {"id": "pb_khung4_one_piece", "name": "🏴‍☠️ One Piece Ra Khơi (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/ymBz6PxW/pb-khung4-one-piece.png", "bg": "#DAAA58"}, {"id": "pb_khung4_thuy_thu_mat_trang", "name": "🌙 Thủy Thủ Mặt Trăng (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/rGYcQ96C/pb-khung4-thuy-thu-mat-trang.png", "bg": "#E69ABF"}, {"id": "pb_khung4_shin_cau_vong", "name": "🌈 Shin Cậu Bé Bút Chì (4 ô)", "category": "PhotoBooth 4 ảnh", "url": "https://i.ibb.co/Mks6JYLR/pb-khung4-shin-cau-vong.png", "bg": "#D8AF4A"}, {"id": "pb_khung2_Polaroid_vintage", "name": "🎞️ Polaroid Vintage (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/LXNdDjTq/pb-khung2-Polaroid-vintage.png", "bg": "#8D7B66"}, {"id": "pb_khung2_merry_christmas", "name": "🎄 Giáng Sinh Len Ấm (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/233fXMdF/pb-khung2-merry-christmas.png", "bg": "#97312F"}, {"id": "pb_khung2_soulmate", "name": "🖤 Soulmate (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/svMSY8tv/pb-khung2-soulmate.png", "bg": "#353535"}, {"id": "pb_khung2_monkey", "name": "🐵 Đôi Bạn Monkey (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/8DdVxVHj/pb-khung2-monkey.png", "bg": "#514D29"}, {"id": "pb_khung2_love_postcard", "name": "💌 Love Postcard (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/mCjwcWzp/pb-khung2-love-postcard.png", "bg": "#673C52"}, {"id": "pb_khung2_camera_pic", "name": "📷 Camera Kỷ Niệm (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/pvVyhPTT/pb-khung2-camera-pic.png", "bg": "#11182C"}, {"id": "pb_khung2_anhdep", "name": "📸 Hai Tấm Xinh Xinh (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/s8v3t3s/pb-khung2-anhdep.png", "bg": "#7F0000"}, {"id": "pb_khung2_anhco", "name": "🎞️ Ký Ức Polaroid (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/HL5vrTyB/pb-khung2-anhco.png", "bg": "#303030"}, {"id": "pb_khung2_di_choi_thoi", "name": "🚶 Hẹn Nhau Đi Chơi (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/dJrDLFdR/pb-khung2-di-choi-thoi.png", "bg": "#9B292D"}, {"id": "pb_khung2_len_do", "name": "👗 Lên Đồ Đi Chơi (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/tptL8rTs/pb-khung2-len-do.png", "bg": "#300020"}, {"id": "pb_khung2_tin_nong", "name": "📰 Tin Nóng Hôm Nay (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/TxZz1LZP/pb-khung2-tin-nong.png", "bg": "#E0C080"}, {"id": "pb_khung2_thang_ngay_ben_nhau", "name": "❤️ Tháng Ngày Bên Nhau (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/nM9ck8n1/pb-khung2-thang-ngay-ben-nhau.png", "bg": "#C00000"}, {"id": "pb_khung2_may_anh", "name": "📷 Góc Máy Thanh Xuân (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/Q702sBD4/pb-khung2-may-anh.png", "bg": "#77776F"}, {"id": "pb_khung2_ki_niem", "name": "💜 Kỷ Niệm Chúng Mình (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/R4TL68B5/pb-khung2-ki-niem.png", "bg": "#E080F0"}, {"id": "pb_khung2_khi_tinh_iu_den", "name": "💙 Khi Tình Yêu Đến (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/Df2479jr/pb-khung2-khi-tinh-iu-den.png", "bg": "#0040E0"}, {"id": "pb_khung2_khi_e_vang", "name": "🖤 Khi Em Vắng Anh (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/XkXPC558/pb-khung2-khi-e-vang.png", "bg": "#252525"}, {"id": "pb_khung2_dieu_em_uoc_ao", "name": "⭐ Điều Em Ước Ao (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/zVgvLwkx/pb-khung2-dieu-em-uoc-ao.png", "bg": "#B66ABB"}, {"id": "pb_khung2_thelove", "name": "📰 The Love Times (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/cjj1b41/pb-khung2-thelove.png", "bg": "#111111"}, {"id": "pb_khung2_outfit", "name": "👕 Outfit Check (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/q33Y6XBt/pb-khung2-outfit.png", "bg": "#2C2C2C"}, {"id": "pb_khung2_thu_tinh", "name": "💌 Thư Tình Ngọt Ngào (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/tGS73Cb/pb-khung2-thu-tinh.png", "bg": "#F3C7CF"}, {"id": "pb_khung2_cuoi_vespa", "name": "🛵 Cưới Vespa (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/4Rc6t4wk/pb-khung2-cuoi-vespa.png", "bg": "#159AAF"}, {"id": "pb_khung2_cinnamoroll", "name": "☁️ Cinnamoroll Đôi Mình (2 ô)", "category": "PhotoBooth 2 ảnh", "url": "https://i.ibb.co/cSXjLD1p/pb-khung2-cinnamoroll.png", "bg": "#99B7D5"}, {"id": "pb_khung3_christmas1", "name": "🦌 Giáng Sinh Tuần Lộc (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/prsH9f2D/pb-khung3-christmas1.png", "bg": "#900D13"}, {"id": "pb_khung3_christmas2", "name": "🎄 Giáng Sinh Selfie (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/mrXhxB8r/pb-khung3-christmas2.png", "bg": "#AF3038"}, {"id": "pb_khung3_christmas3", "name": "🎅 Ho Ho Ho! (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/5x12NqMr/pb-khung3-christmas3.png", "bg": "#9E1714"}, {"id": "pb_khung3_we_are_friend", "name": "🩷 Chúng Mình Là Bạn (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/1GjhMxjy/pb-khung3-we-are-friend.png", "bg": "#D76A9A"}, {"id": "pb_khung3_taste_of_love", "name": "💙 Hương Vị Tình Yêu (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/ccTcxLkh/pb-khung3-taste-of-love.png", "bg": "#415C9E"}, {"id": "pb_khung3_google", "name": "🔍 Google: Tình Yêu Là Gì? (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/CpXsvnD6/pb-khung3-google.png", "bg": "#4285F4"}, {"id": "pb_khung3_photo_iphone", "name": "📱 Photo iPhone (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/rKjTNJGN/pb-khung3-photo-iphone.png", "bg": "#CAC9D2"}, {"id": "pb_khung3_polaroid2", "name": "🎞️ Polaroid Kỷ Niệm (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/KRmvDMv/pb-khung3-polaroid2.png", "bg": "#32312E"}, {"id": "pb_khung3_fruit", "name": "🍓 Hội Trái Cây (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/t6CJPR5/pb-khung3-fruit.png", "bg": "#E97B91"}, {"id": "pb_khung3_da_bao", "name": "🐆 Da Báo (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/60SxrSfM/pb-khung3-da-bao.png", "bg": "#694C35"}, {"id": "pb_khung3_mothaiba", "name": "✌️ Một Hai Ba (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/SX2XNR2H/pb-khung3-mothaiba.png", "bg": "#7296BE"}, {"id": "pb_khung3_ngay_mai_tuoi_sang", "name": "☀️ Ngày Mai Tươi Sáng (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/6JJ4bpRz/pb-khung3-ngay-mai-tuoi-sang.png", "bg": "#242424"}, {"id": "pb_khung3_memory", "name": "🌲 Memory Lane (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/Z6qGH95K/pb-khung3-memory.png", "bg": "#103020"}, {"id": "pb_khung3_Vinyl", "name": "🎵 Vinyl Memories (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/Y4Wg5LLK/pb-khung3-Vinyl.png", "bg": "#581C24"}, {"id": "pb_khung3_Polaroid", "name": "📸 Polaroid Nhật Ký (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/99qqLC2C/pb-khung3-Polaroid.png", "bg": "#DC2626"}, {"id": "pb_khung3_photodump", "name": "✨ Photo Dump Hôm Nay (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/ZpBk2qsn/pb-khung3-photodump.png", "bg": "#C49A6C"}, {"id": "pb_khung3_hoi_ban_than", "name": "👯 Hội Bạn Thân (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/r9FrQNN/pb-khung3-hoi-ban-than.png", "bg": "#A0B060"}, {"id": "pb_khung3_hen_nha", "name": "💕 Hẹn Nhau Nha (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/rGn7k7ZX/pb-khung3-hen-nha.png", "bg": "#E0B0B0"}, {"id": "pb_khung3_love_so_much", "name": "❤️ Love So Much (3 ô)", "category": "PhotoBooth 3 ảnh", "url": "https://i.ibb.co/VWBhSL5V/pb-khung3-love-so-much.png", "bg": "#7A0010"}, {"id": "pb_khung1_color", "name": "🌈 Cầu Vồng Kẹo Ngọt", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/nMzqD0Ds/pb-khung1-color.png", "bg": "#D968A1"}, {"id": "pb_khung1_meow", "name": "🐱 Meow", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/yc6B63Tf/pb-khung1-meow.png", "bg": "#AB773F"}, {"id": "pb_khung1_sao_nen_trang", "name": "⭐ Sao Nền Trắng", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/mV2d5jjn/pb-khung1-sao-nen-trang.png", "bg": "#515B69"}, {"id": "pb_khung1_nen_mua", "name": "🌧️ Nền Mưa", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/fd23DWTx/pb-khung1-nen-mua.png", "bg": "#657D92"}, {"id": "pb_khung1_meme_meo", "name": "😹 Mèo Meme", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/bj7F0CjH/pb-khung1-meme-meo.png", "bg": "#826751"}, {"id": "pb_khung1_faker", "name": "🏆 Faker", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/PGMqg3QP/pb-khung1-faker.png", "bg": "#282622"}, {"id": "pb_khung1_mona_lisa", "name": "🖼️ Mona Lisa", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/sp0VdQR6/pb-khung1-mona-lisa.png", "bg": "#5D512B"}, {"id": "pb_khung1_locket_camera", "name": "📸 Locket Camera", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/qM92BZJN/pb-khung1-locket-camera.png", "bg": "#202020"}, {"id": "pb_khung1_spotifyPC", "name": "🎧 Spotify PC", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/JR6bpNTx/pb-khung1-spotify-PC.png", "bg": "#23282B"}, {"id": "pb_khung1_spotify_hong", "name": "🩷 Spotify Hồng", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/Bd85vXd/pb-khung1-spotify-hong.png", "bg": "#C83978"}, {"id": "pb_khung1_camfuji", "name": "📷 Fuji Film", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/gFTKZ7Nb/pb-khung1-camfuji.png", "bg": "#161616"}, {"id": "pb_khung1_messi", "name": "🏆 Messi Cúp", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/vv68Hb1k/pb-khung1-messi.png", "bg": "#258599"}, {"id": "pb_khung1_ronaldo_cup", "name": "🏆 Ronaldo Cúp", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/4wTX3mjr/pb-khung1-ronaldo-cup.png", "bg": "#A82432"}, {"id": "pb_khung1_menu_ios", "name": "📱 Menu iOS", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/SwYnwHbk/pb-khung1-menu-ios.png", "bg": "#36343D"}, {"id": "pb_khung1_the_hinh", "name": "💪 Thể Hình", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/qY56FK9t/pb-khung1-the-hinh.png", "bg": "#6E4634"}, {"id": "pb_khung1_iphone", "name": "🎵 Now Playing", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/1tNyKJLS/pb-khung1-iphone.png", "bg": "#303A43"}, {"id": "pb_khung1_tivi", "name": "📺 Ký Ức Màn Hình", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/LD3FTZPQ/pb-khung1-tivi.png", "bg": "#686962"}, {"id": "pb_khung1_the_gioi_cua_2_ta", "name": "💕 Thế Giới Của Hai Ta", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/5xFnwjQV/pb-khung1-the-gioi-cua-2-ta.png", "bg": "#222222"}, {"id": "pb_khung1_selflove", "name": "🤍 Self Love Club", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/GQyrqhWR/pb-khung1-selflove.png", "bg": "#383530"}, {"id": "pb_khung1_ptb", "name": "📼 MIXTAPE VOIL.1", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/kddzGfK/pb-khung1-ptb.png", "bg": "#222222"}, {"id": "pb_khung1_oi_tinh_yeu", "name": "💚 Ôi, Tình Yêu!", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/n461YLp/pb-khung1-oi-tinh-yeu.png", "bg": "#90F000"}, {"id": "pb_khung1_card", "name": "🪪 Thẻ Thanh Xuân", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/Kpnz06yQ/pb-khung1-card.png", "bg": "#103060"}, {"id": "pb_khung1_love_e_nhiu", "name": "💖 Love Em Nhiều", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/Ps6kjFsQ/pb-khung1-love-e-nhiu.png", "bg": "#E77C30"}, {"id": "pb_khung1_ki_niem_tuoi_dep", "name": "🖼️ Kỷ Niệm Tươi Đẹp", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/DfdLM7yc/pb-khung1-ki-niem-tuoi-dep.png", "bg": "#252525"}, {"id": "pb_khung1_ins", "name": "📷 Instagram Moments", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/NdLq5Pwz/pb-khung1-ins.png", "bg": "#343434"}, {"id": "pb_khung1_hoi_chieu_troi_mua", "name": "🌧️ Hồi Chiều Trời Mưa", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/0RrmCJD5/pb-khung1-hoi-chieu-troi-mua.png", "bg": "#C02030"}, {"id": "pb_khung1_dia", "name": "💿 Chiếc Đĩa Kỷ Niệm", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/nsQ6fQc1/pb-khung1-dia.png", "bg": "#8B641E"}, {"id": "pb_khung1_chuong_cuoi", "name": "📖 Chương Cuối Thanh Xuân", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/jP9pjPwm/pb-khung1-chuong-cuoi.png", "bg": "#515151"}, {"id": "pb_khung1_maytinh", "name": "🖥️ Màn Hình Hoài Niệm", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/HTkvY33t/pb-khung1-maytinh.png", "bg": "#706050"}, {"id": "pb_khung1_mat_tin_hieu", "name": "📡 No Signal", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/dsxhDbBK/pb-khung1-mat-tin-hieu.png", "bg": "#402060"}, {"id": "pb_khung1_Camera_iPhone", "name": "📷 Camera iPhone", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/Kj3FFqYX/pb-khung1-Camera-i-Phone.png", "bg": "#7A1F1F"}, {"id": "pb_khung1_khong_buong", "name": "🎵 Không Buông", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/7x6Pb2xD/pb-khung1-khong-buong.png", "bg": "#355C7D"}, {"id": "pb_khung1_chua_som", "name": "💬 Chửa Sớm", "category": "Trend", "url": "https://i.ibb.co/0y80G7tC/pb-khung1-chua-som.png", "bg": "#252525"}, {"id": "trend_bang_tin_khan", "name": "🚨 Bảng Tin Khẩn", "category": "Trend", "url": "https://i.ibb.co/zVNyZmhM/trend-bang-tin-khan.png", "bg": "#D62828"}, {"id": "trend_ve_giu_xe", "name": "🎫 Vé Gửi Xe", "category": "Trend", "url": "https://i.ibb.co/LXjg2rpn/trend-ve-giu-xe.png", "bg": "#6F8750"}, {"id": "trend_vo_hoc_sinh", "name": "📓 Vở Học Sinh", "category": "Trend", "url": "https://i.ibb.co/fzf9t7gN/trend-vo-hoc-sinh.png", "bg": "#D94742"}, {"id": "trend_giao_vien_cham_bai", "name": "✏️ Giáo Viên Chấm Bài", "category": "Trend", "url": "https://i.ibb.co/ynSG9Ynm/trend-giao-vien-cham-bai.png", "bg": "#C83232"}, {"id": "trend_nhiem_vu_hom_nay_la", "name": "✅ Nhiệm Vụ Hôm Nay", "category": "Trend", "url": "https://i.ibb.co/7qS3qny/trend-nhiem-vu-hom-nay-la.png", "bg": "#65846A"}, {"id": "trend_hoa_don_di_choi", "name": "🧾 Hóa Đơn Đi Chơi", "category": "Trend", "url": "https://i.ibb.co/8DPcgyKx/trend-hoa-don-di-choi.png", "bg": "#A67C52"}, {"id": "trend_binh_luan_duoc_ghim", "name": "📌 Bình Luận Được Ghim", "category": "Trend", "url": "https://i.ibb.co/k6SVcsCb/trend-binh-luan-duoc-ghim.png", "bg": "#9CA3AF"}, {"id": "trend_camera_an_ninh", "name": "📹 Camera An Ninh", "category": "Trend", "url": "https://i.ibb.co/67hwdL0f/trend-camera-an-ninh.png", "bg": "#374151"}, {"id": "trend_thong_bao_ngan_hang", "name": "💳 Thông Báo Ngân Hàng", "category": "Trend", "url": "https://i.ibb.co/H6KZYDb/trend-thong-bao-ngan-hang.png", "bg": "#16A34A"}, {"id": "trend_chat_nhom_leak", "name": "💬 Chat Nhóm Leak", "category": "Trend", "url": "https://i.ibb.co/dv7KFzX/trend-chat-nhom-leak.png", "bg": "#1559E8"}, {"id": "pb_khung1_photobooth_cute", "name": "🎀 Photobooth Cute", "category": "Frames", "url": "https://i.ibb.co/rftzQtJ8/pb-khung1-photobooth-cute.png", "bg": "#FFD6E0"}, {"id": "pb_khung1_frame_classic_pb", "name": "🎞️ Photobooth Cổ Điển", "category": "Frames", "url": "https://i.ibb.co/chvrZsq6/pb-khung1-frame-classic-pb.png", "bg": "#FF758C"}, {"id": "pb_khung1_hello_kitty_pastel_ngot_ngao", "name": "🐱 Hello Kitty Ngọt Ngào", "category": "Frames", "url": "https://i.ibb.co/21DKfDpd/pb-khung1-hello-kitty-pastel-ngot-ngao.png", "bg": "#FF758C"}, {"id": "pb_khung1_hello_kitty_hong_pastel", "name": "🎀 Khung Hello Kitty Hồng", "category": "Frames", "url": "https://i.ibb.co/212LnDY4/pb-khung1-hello-kitty-hong-pastel.png", "bg": "#FF758C"}, {"id": "pb_khung1_pastel_vien_ren", "name": "🎀 Nơ Pastel Viền Ren", "category": "Frames", "url": "https://i.ibb.co/pvH98V12/pb-khung1-pastel-vien-ren.png", "bg": "#FF758C"}, {"id": "pb_khung1_hoa_pastel_vien_xanh_xinh", "name": "🌼 Hoa Xinh Pastel", "category": "Frames", "url": "https://i.ibb.co/V0JVKzCz/pb-khung1-hoa-pastel-vien-xanh-xinh.png", "bg": "#51e6e4"}, {"id": "pb_khung1_spiderred", "name": "🕷️ Nhện Đỏ", "category": "Frames", "url": "https://i.ibb.co/DPDXpXDH/pb-khung1-spiderred.png", "bg": "#8F1D28"}, {"id": "pb_khung1_khong_gian_xanh_pastel", "name": "🌙 Không Gian Xanh", "category": "Frames", "url": "https://i.ibb.co/PsM4mFBY/pb-khung1-khong-gian-xanh-pastel.png", "bg": "#66BDE6"}, {"id": "pb_khung1_ngoi_sao_hong_pastel", "name": "⭐ Ngôi Sao Hồng", "category": "Frames", "url": "https://i.ibb.co/JMjCMTq/pb-khung1-ngoi-sao-hong-pastel.png", "bg": "#EF82BB"}, {"id": "pb_khung1_pastel_so_hai_cau", "name": "🦭 Sò Hải Cẩu Pastel", "category": "Frames", "url": "https://i.ibb.co/QFPpT42Q/pb-khung1-pastel-so-hai-cau.png", "bg": "#8DC6F0"}, {"id": "pb_khung1_shin_chan", "name": "🖍️ Shin-Chan (1 ô)", "category": "Frames", "url": "https://i.ibb.co/j9GqnqzG/pb-khung1-shin-chan.png", "bg": "#f00008"}, {"id": "pb_khung1_anh_hellokitty_v_sao", "name": "⭐ Hello Kitty & Sao", "category": "Frames", "url": "https://i.ibb.co/KpBH441P/pb-khung1-anh-hellokitty-v-sao.png", "bg": "#780c23"}, {"id": "pb_khung1_xanh_tay_sao_vang", "name": "⭐ Sao Vàng Xanh", "category": "Frames", "url": "https://i.ibb.co/twnZnRCK/pb-khung1-xanh-tay-sao-vang.png", "bg": "#6fb1d3"}, {"id": "pb_khung1_sinh_nhat_hello_kitty", "name": "🎂 Sinh Nhật Hello Kitty", "category": "Frames", "url": "https://i.ibb.co/Mx5cRQ41/pb-khung1-sinh-nhat-hello-kitty.png", "bg": "#B94C49"}, {"id": "pb_khung1_y2k_silver_holo", "name": "💿 Khung Y2K Silver Holo", "category": "Frames", "url": "https://i.ibb.co/wZbz4TGv/pb-khung1-y2k-silver-holo.png", "bg": "#C4B5FD"}, {"id": "pb_khung1_denim_ripped", "name": "👖 Khung Denim Cá Tính", "category": "Frames", "url": "https://i.ibb.co/Hf2QXz3H/pb-khung1-denim-ripped.png", "bg": "#294D75"}, {"id": "pb_khung1_film_nostalgia", "name": "🎞️ Khung Film Hoài Cổ", "category": "Frames", "url": "https://i.ibb.co/1f56bB2H/pb-khung1-film-nostalgia.png", "bg": "#D6A36A"}, {"id": "pb_khung1_thu_tinh", "name": "💌 Thư Tình Gửi Cậu", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/fzcF9MPq/pb-khung1-thu-tinh.png", "bg": "#E8A9B5"}, {"id": "pb_khung1_cute", "name": "🎀 Cute Hết Cứu", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/jZw0VqSS/pb-khung1-cute.png", "bg": "#FF9BCB"}, {"id": "pb_khung1_anh_tho", "name": "🤡 Ảnh Thờ", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/7tVQDWxp/pb-khung1-anh-tho.png", "bg": "#C78B38"}, {"id": "pb_khung1_matmoc", "name": "🤪 Mặt Mộc", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/zThTFkT7/pb-khung1-matmoc.png", "bg": "#383538"}, {"id": "pb_khung1_luffy", "name": "🏴‍☠️ Truy Nã", "category": "Khung 1 ảnh", "url": "https://i.ibb.co/VcYsmTw7/pb-khung1-luffy.png", "bg": "#D9C3A7"}, {"id": "cmt_phai_luon_tu_te", "name": "💬 Phải Luôn Tử Tế", "category": "Comment TikTok", "url": "https://i.ibb.co/Jw1FkgJk/cmt-phai-luon-tu-te.png", "bg": "#31343B"}, {"id": "cmt_chi_can_mot_vet_xuoc", "name": "💬 Chỉ Cần Một Vết Xước", "category": "Comment TikTok", "url": "https://i.ibb.co/whcktGzW/cmt-chi-can-mot-vet-xuoc.png", "bg": "#145B83"}, {"id": "cmt_siuu", "name": "⚽ Ronaldo SIUUU", "category": "Comment TikTok", "url": "https://i.ibb.co/YBkxjvM7/cmt-siuu.png", "bg": "#344B5B"}, {"id": "cmt_binh_luan_minh_tue", "name": "💬 Trend Tíc Tóc", "category": "Comment TikTok", "url": "https://i.ibb.co/4n4MNd0q/cmt-binh-luan-minh-tue.png", "bg": "#557C77"}, {"id": "cmt_locket", "name": "💛 Locket Việt Nam", "category": "Comment TikTok", "url": "https://i.ibb.co/q37GwBbV/cmt-locket.png", "bg": "#D99D17"}, {"id": "cmt_sontung", "name": "🎤 Sơn Tùng MTP", "category": "Comment TikTok", "url": "https://i.ibb.co/9mWdMbgm/cmt-sontung.png", "bg": "#344C47"}, {"id": "cmt_xinh", "name": "💬 Ai Cho Xinh Vậy", "category": "Comment TikTok", "url": "https://i.ibb.co/Dm5Y52t/cmt-xinh.png", "bg": "#F43F5E"}, {"id": "cmt_posst", "name": "💬 Tấm Cuối Đáng Đăng", "category": "Comment TikTok", "url": "https://i.ibb.co/8Qq1Khx/cmt-posst.png", "bg": "#EF4444"}, {"id": "cmt_flash", "name": "⚡ Flash Đổi Nhân Cách", "category": "Comment TikTok", "url": "https://i.ibb.co/qLQJ1F97/cmt-flash.png", "bg": "#06B6D4"}, {"id": "cmt_duanma", "name": "👻 Dự Án Ma", "category": "Comment TikTok", "url": "https://i.ibb.co/k2cNRWTC/cmt-duanma.png", "bg": "#EF4444"}, {"id": "cmt_dichup", "name": "📸 Chụp 3 Tấm Lựa 3 Tiếng", "category": "Comment TikTok", "url": "https://i.ibb.co/ZzddktL0/cmt-dichup.png", "bg": "#06B6D4"}, {"id": "cmt_chuano", "name": "🌸 Đừng Khinh Thường Hoa", "category": "Comment TikTok", "url": "https://i.ibb.co/tMKs5gNC/cmt-chuano.png", "bg": "#06B6D4"}, {"id": "cmt_anhdim", "name": "📸 Bạn Thân Giữ Ảnh Dìm", "category": "Comment TikTok", "url": "https://i.ibb.co/B5bs5SRh/cmt-anhdim.png", "bg": "#EF4444"}, {"id": "pb_khung1_khong_can_ai_duyet", "name": "💬 Không Cần Ai Duyệt", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/cKH8Rdws/pb-khung1-khong-can-ai-duyet.png", "bg": "#414141"}, {"id": "pb_khung1_ban_la_gi_ma_toi_phai_ban_tam", "name": "💬 Bạn Là Gì?", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/FkWgZq1z/pb-khung1-ban-la-gi-ma-toi-phai-ban-tam.png", "bg": "#292929"}, {"id": "pb_khung1_ong_troi_that_bat_cong", "name": "💬 Ông Trời Thật Bất Công", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/xKKnjMLF/pb-khung1-ong-troi-that-bat-cong.png", "bg": "#343434"}, {"id": "pb_khung1_yeu_giau_chu_co_phai_yeu_dau_dau_ma_doi_ghen", "name": "💬 Yêu Giấu Chứ Có Phải Yêu Dấu", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/ycxrqHKN/pb-khung1-yeu-giau-chu-co-phai-yeu-dau-dau-ma-doi-ghen.png", "bg": "#343434"}, {"id": "pb_khung1_me_con_dien", "name": "💬 Mẹ Con Điên", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/KcJtD23M/pb-khung1-me-con-dien.png", "bg": "#343434"}, {"id": "pb_khung1_thieu_vang_ngot_ngao_cua_em", "name": "💬 Thiếu Vắng Ngọt Ngào Của Em", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/SFkZcdP/pb-khung1-thieu-vang-ngot-ngao-cua-em.png", "bg": "#343434"}, {"id": "pb_khung1_loi_cua_tao_a", "name": "💬 Lỗi Của Tao À?", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/8nkgRQmy/pb-khung1-loi-cua-tao-a.png", "bg": "#343434"}, {"id": "pb_khung1_tao_song_sao", "name": "💬 Tao Sống Sao Kệ Tao?", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/CswzX5RP/pb-khung1-tao-song-sao.png", "bg": "#343434"}, {"id": "pb_khung1_tuyet_vong", "name": "💬 Tuyệt Vọng", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/M5sDVhjp/pb-khung1-tuyet-vong.png", "bg": "#242424"}, {"id": "pb_khung1_dech_quan_tam", "name": "💬 Đếch Quan Tâm", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/XfncCV2Z/pb-khung1-dech-quan-tam.png", "bg": "#607EA9"}, {"id": "pb_khung1_met5_ma_cai_toi5m1", "name": "💬 Mét 5 Mà Cái Tôi 5m1", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/BVqZKT5r/pb-khung1-met5-ma-cai-toi5m1.png", "bg": "#343434"}, {"id": "pb_khung1_99_phan_tram_co_the_la_ngai", "name": "💬 99% Cơ Thể Là Ngại", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/NdGF9t1R/pb-khung1-99-phan-tram-co-the-la-ngai.png", "bg": "#343434"}, {"id": "pb_khung1_noi_ko_buon_la_noi_doi", "name": "💬 Nói Không Buồn Là Nói Dối", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/27hGzd1Q/pb-khung1-noi-ko-buon-la-noi-doi.png", "bg": "#343434"}, {"id": "pb_khung1_mo_long_lan_nao_la_du_ma_lan_do", "name": "💬 Mở Lòng Lần Nào...", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/5xjV2GF4/pb-khung1-mo-long-lan-nao-la-du-ma-lan-do.png", "bg": "#343434"}, {"id": "pb_khung1_uoc_gi_buon_cung_ra_tien", "name": "💬 Ước Gì Buồn Cũng Ra Tiền", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/SwVsK9Pc/pb-khung1-uoc-gi-buon-cung-ra-tien.png", "bg": "#343434"}, {"id": "pb_khung1_han_toan", "name": "💬 Hận Toán", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/99y2GRK7/pb-khung1-han-toan.png", "bg": "#DC2626"}, {"id": "pb_khung1_khong_tin_dan_ong", "name": "💬 Không Tin Đàn Ông", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/mFM1dfKx/pb-khung1-khong-tin-dan-ong.png", "bg": "#343434"}, {"id": "pb_khung1_kho_do_danh", "name": "💬 Khó Dỗ Dành", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/YB9Y74jR/pb-khung1-kho-do-danh.png", "bg": "#343434"}, {"id": "pb_khung1_xinh_gai_tinh_quai", "name": "💬 Xinh Gái Tinh Quái", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/fGnn4btD/pb-khung1-xinh-gai-tinh-quai.png", "bg": "#343434"}, {"id": "pb_khung1_song_basic", "name": "💬 Sống Basic Cho Đời Cơ Bản", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/KjS2Fnq0/pb-khung1-song-basic.png", "bg": "#CF0875"}, {"id": "pb_khung1_hoang_tu_am_o", "name": "💬 Hoàng Tử Ẩm Ơ", "category": "Tâm Trạng & Cà Khịa", "url": "https://i.ibb.co/HLmd2z15/pb-khung1-hoang-tu-am-o.png", "bg": "#343434"}];
 
     const RETRO_FILTERS = [
-      { id: "none", name: "🚫 Gốc", badge: "Gốc" },
-      { id: "digicam", name: "📷 Digicam", badge: "CCD" },
-      { id: "point_shoot", name: "🌸 Point & Shoot", badge: "Flash" },
-      { id: "noir", name: "🖤 Noir", badge: "Đen trắng" },
-      { id: "vhs", name: "📼 VHS", badge: "Băng từ" },
-      { id: "disposable", name: "🎞️ Disposable", badge: "Phim 1 lần" },
-      { id: "golden_hour", name: "🌅 Golden Hour", badge: "Nắng vàng" },
-      { id: "atlas_35mm", name: "🎞️ Atlas 35mm", badge: "35mm" },
-      { id: "home_movie", name: "📽️ Home Movie", badge: "Cổ điển" },
-      { id: "daydream", name: "☁️ Daydream", badge: "Mộng mơ" },
-      { id: "bubblegum", name: "🫧 Bubblegum", badge: "Hồng pastel" },
-      { id: "lofi", name: "👾 Lofi", badge: "Pixel" },
-      { id: "fisheye", name: "🔮 Fisheye", badge: "Mắt cá" },
-      { id: "concave", name: "🪞 Gương lõm", badge: "Hóp tâm" },
-      { id: "swirl", name: "🌀 Xoáy ốc", badge: "Xoáy" },
-      { id: "mirror_twin", name: "🪞 Gương đôi", badge: "Đối xứng" },
-      { id: "laptop", name: "💻 Laptop", badge: "Webcam" }
+      { id: "none", name: "Gốc", icon: "⚪", group: "film" },
+      { id: "digicam", name: "Digicam", icon: "📷", group: "film" },
+      { id: "point_shoot", name: "Point & Shoot", icon: "🌸", group: "film" },
+      { id: "noir", name: "Noir", icon: "🖤", group: "film" },
+      { id: "vhs", name: "VHS", icon: "📼", group: "film" },
+      { id: "disposable", name: "Disposable", icon: "🎞️", group: "film" },
+      { id: "golden_hour", name: "Golden Hour", icon: "🌅", group: "film" },
+      { id: "atlas_35mm", name: "Atlas 35mm", icon: "🎬", group: "film" },
+      { id: "home_movie", name: "Home Movie", icon: "📽️", group: "film" },
+      { id: "daydream", name: "Daydream", icon: "☁️", group: "film" },
+      { id: "bubblegum", name: "Bubblegum", icon: "🫧", group: "film" },
+      { id: "lofi", name: "Lofi", icon: "👾", group: "film" },
+      { id: "laptop", name: "Laptop", icon: "💻", group: "film" },
+      { id: "fisheye", name: "Mắt cá", icon: "🔮", group: "warp" },
+      { id: "concave", name: "Gương lõm", icon: "🪞", group: "warp" },
+      { id: "swirl", name: "Xoáy ốc", icon: "🌀", group: "warp" },
+      { id: "mirror_twin", name: "Gương đôi", icon: "👯", group: "warp" }
     ];
 
     const AI_STYLES = [
@@ -1233,9 +1443,6 @@
       { name: "✨ Kim tuyến lấp lánh", prompt: "Add dreamy golden sparkles and soft lens flare bokeh" }
     ];
 
-    // =========================================================================
-    // STATE
-    // =========================================================================
     const state = {
       session: null,
       friends: [],
@@ -1246,9 +1453,9 @@
       rafId: null,
       activeFilter: "none",
       dateStamp: false,
-      boothMode: false, // false = 1x1, true = 2x2
+      boothMode: false,
       boothCapturing: false,
-      activeFrame: null, // { id, name, url, bg }
+      activeFrame: null,
       capturedBlob: null,
       capturedUrl: null,
       isVideo: false,
@@ -1258,17 +1465,16 @@
         icon: "",
         colors: [],
         textColor: "#FFFFFF",
-        musicMeta: null,
-        extra: {}
+        musicMeta: null
       },
-      chatList: [],
-      activeChat: null,
       recoveryDate: "",
       gridMoments: [],
       gridPageToken: null,
       calYear: new Date().getFullYear(),
       calMonth: new Date().getMonth() + 1,
       calMoments: [],
+      chatList: [],
+      activeChat: null,
       viewerMoment: null,
       isAdmin: false,
       warpCacheKey: "",
@@ -1297,8 +1503,7 @@
     }
 
     function getAiUsageKey() {
-      const uid = state.session?.uid || "guest";
-      return `locket_share_ai_${uid}_${vnTodayStr()}`;
+      return `locket_share_ai_${state.session?.uid || "guest"}_${vnTodayStr()}`;
     }
 
     function getRemainingAiQuota() {
@@ -1327,13 +1532,11 @@
     }
 
     // =========================================================================
-    // AUTH & WORKER API CLIENT
+    // AUTH & WORKER API
     // =========================================================================
     function saveSession(sess) {
       state.session = sess;
-      try {
-        localStorage.setItem("locket_share_session_v1", JSON.stringify(sess));
-      } catch {}
+      try { localStorage.setItem("locket_share_session_v1", JSON.stringify(sess)); } catch {}
     }
 
     function loadSession() {
@@ -1348,8 +1551,7 @@
 
     async function ensureValidToken() {
       if (!state.session) throw new Error("Chưa đăng nhập");
-      const now = Date.now();
-      if (state.session.idToken && state.session.expiresAt && now < state.session.expiresAt - 120000) {
+      if (state.session.idToken && state.session.expiresAt && Date.now() < state.session.expiresAt - 120000) {
         return state.session.idToken;
       }
       const res = await fetch(`${WORKER_URL}/auth/refresh`, {
@@ -1358,9 +1560,7 @@
         body: JSON.stringify({ refreshToken: state.session.refreshToken })
       });
       const data = await res.json();
-      if (!res.ok || !data.id_token) {
-        throw new Error("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.");
-      }
+      if (!res.ok || !data.id_token) throw new Error("Phiên đăng nhập hết hạn, hãy đăng nhập lại.");
       state.session.idToken = data.id_token;
       state.session.refreshToken = data.refresh_token || state.session.refreshToken;
       state.session.expiresAt = Date.now() + (parseInt(data.expires_in || "3600", 10) * 1000);
@@ -1372,16 +1572,11 @@
       const token = await ensureValidToken();
       const res = await fetch(`${WORKER_URL}/rpc/${endpoint}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ data: bodyData })
       });
       const json = await res.json();
-      if (!res.ok || json.errors?.length) {
-        throw new Error(json.error || JSON.stringify(json.errors || json));
-      }
+      if (!res.ok || json.errors?.length) throw new Error(json.error || JSON.stringify(json.errors || json));
       return json;
     }
 
@@ -1392,9 +1587,7 @@
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (!res.ok || !data.idToken) {
-        throw new Error(data.error?.message || data.error || "Sai email hoặc mật khẩu");
-      }
+      if (!res.ok || !data.idToken) throw new Error(data.error?.message || data.error || "Sai email hoặc mật khẩu");
       const sess = {
         uid: data.localId,
         email: data.email || email,
@@ -1403,11 +1596,8 @@
         expiresAt: Date.now() + (parseInt(data.expiresIn || "3600", 10) * 1000),
         displayName: data.displayName || email.split("@")[0]
       };
-      if ($("rememberCheck").checked) {
-        saveSession(sess);
-      } else {
-        state.session = sess;
-      }
+      if ($("rememberCheck").checked) saveSession(sess);
+      else state.session = sess;
       return sess;
     }
 
@@ -1420,12 +1610,12 @@
         const u = me?.result?.data || me?.result || {};
         const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ").trim() || state.session.displayName;
         state.session.displayName = fullName;
-        state.session.avatarUrl = u.profile_picture_url || "";
         $("profNameLabel").textContent = fullName;
         $("profEmailLabel").textContent = state.session.email || "";
         if (u.profile_picture_url) {
-          $("btnTopAvatar").innerHTML = `<img src="${u.profile_picture_url}" alt="avt" />`;
-          $("profAvatarBig").innerHTML = `<img src="${u.profile_picture_url}" alt="avt" />`;
+          const avt = replaceFirebaseWithCDN(u.profile_picture_url);
+          $("btnTopAvatar").innerHTML = `<img src="${avt}" alt="avt" />`;
+          $("profAvatarBig").innerHTML = `<img src="${avt}" alt="avt" />`;
         }
       } catch {}
 
@@ -1436,8 +1626,7 @@
         });
         if (!fsRes.ok) return;
         const fsJson = await fsRes.json();
-        const docs = fsJson.documents || [];
-        const uids = docs.map((d) => (d.name || "").split("/").pop()).filter(Boolean);
+        const uids = (fsJson.documents || []).map((d) => (d.name || "").split("/").pop()).filter(Boolean);
         $("friendCountLabel").textContent = String(uids.length);
         $("profFriendCount").textContent = String(uids.length);
 
@@ -1446,7 +1635,7 @@
             const r = await callRpc("fetchUserV2", { user_uid: fuid });
             const d = r?.result?.data || r?.result || {};
             const name = [d.first_name, d.last_name].filter(Boolean).join(" ").trim() || d.username || fuid.slice(0, 6);
-            return { uid: fuid, name, avatar: d.profile_picture_url || "" };
+            return { uid: fuid, name, avatar: replaceFirebaseWithCDN(d.profile_picture_url || "") };
           } catch {
             return { uid: fuid, name: fuid.slice(0, 6), avatar: "" };
           }
@@ -1461,15 +1650,15 @@
     function renderFriendsStrip() {
       const strip = $("friendsStrip");
       const items = [
-        { uid: "private", name: "Riêng tư", icon: "🔒" },
-        { uid: "all", name: "Tất cả", icon: "👥" },
+        { uid: "private", name: "Riêng tư", svg: `<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` },
+        { uid: "all", name: "Tất cả", svg: `<svg class="ico" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>` },
         ...state.friends
       ];
       strip.innerHTML = items.map((f) => {
         const sel = state.selectedRecipient === f.uid ? "selected" : "";
         const inner = f.avatar
           ? `<img src="${f.avatar}" alt="${f.name}" />`
-          : `<span>${f.icon || f.name.slice(0, 1).toUpperCase()}</span>`;
+          : (f.svg || `<span>${f.name.slice(0, 1).toUpperCase()}</span>`);
         return `<div class="friend-chip ${sel}" data-uid="${f.uid}">
           <div class="friend-ring">${inner}</div>
           <div class="friend-name">${f.name}</div>
@@ -1485,7 +1674,7 @@
     }
 
     // =========================================================================
-    // LIVE CAMERA + 16 REAL-TIME FILTERS & MIRROR WARPS
+    // FULL-BLEED CAMERA (FIXED 720x720 == CANVAS WIDTH) + 16 LIVE FILTERS
     // =========================================================================
     async function startCamera() {
       stopCamera();
@@ -1503,24 +1692,15 @@
         const video = $("camVideo");
         video.srcObject = stream;
         await video.play();
-        $("camModeHint").textContent = state.facingMode === "user"
-          ? "Cam trước: soi & xuất gương chuẩn • Video gốc < 6 MB"
-          : "Cam sau: giữ nguyên không lật • Video gốc < 6 MB";
         startCameraLoop();
-      } catch (err) {
+      } catch {
         $("camNoPerm").style.display = "flex";
       }
     }
 
     function stopCamera() {
-      if (state.rafId) {
-        cancelAnimationFrame(state.rafId);
-        state.rafId = null;
-      }
-      if (state.stream) {
-        state.stream.getTracks().forEach((t) => t.stop());
-        state.stream = null;
-      }
+      if (state.rafId) { cancelAnimationFrame(state.rafId); state.rafId = null; }
+      if (state.stream) { state.stream.getTracks().forEach((t) => t.stop()); state.stream = null; }
     }
 
     function buildWarpLut(filterId, size) {
@@ -1537,23 +1717,18 @@
           const r = Math.hypot(nx, ny);
           let sx = nx, sy = ny;
           if (filterId === "fisheye" && r < 1.0 && r > 0) {
-            const rn = Math.pow(r, 1.55);
-            const k = rn / r;
+            const k = Math.pow(r, 1.55) / r;
             sx = nx * k; sy = ny * k;
           } else if (filterId === "concave" && r < 1.0 && r > 0) {
-            const rn = Math.pow(r, 0.58);
-            const k = rn / r;
+            const k = Math.pow(r, 0.58) / r;
             sx = nx * k; sy = ny * k;
           } else if (filterId === "swirl" && r < 1.0) {
             const ang = 2.6 * (1.0 - r);
             const c = Math.cos(ang), s = Math.sin(ang);
-            sx = nx * c - ny * s;
-            sy = nx * s + ny * c;
+            sx = nx * c - ny * s; sy = nx * s + ny * c;
           }
-          const px = Math.max(0, Math.min(size - 1, Math.round(sx * half + half)));
-          const py = Math.max(0, Math.min(size - 1, Math.round(sy * half + half)));
-          mx[y * size + x] = px;
-          my[y * size + x] = py;
+          mx[y * size + x] = Math.max(0, Math.min(size - 1, Math.round(sx * half + half)));
+          my[y * size + x] = Math.max(0, Math.min(size - 1, Math.round(sy * half + half)));
         }
       }
       state.warpCacheKey = key;
@@ -1579,8 +1754,8 @@
     }
 
     function renderFrameToCanvas(video, ctx, size, isCapture = false) {
-      const vw = video.videoWidth || 720;
-      const vh = video.videoHeight || 720;
+      const vw = video.videoWidth || size;
+      const vh = video.videoHeight || size;
       const side = Math.min(vw, vh);
       const sx = (vw - side) / 2;
       const sy = (vh - side) / 2;
@@ -1589,18 +1764,16 @@
       ctx.clearRect(0, 0, size, size);
       ctx.filter = getCanvasCssFilter(state.activeFilter);
 
-      // CRITICAL MIRRORING: front cam mirrors both live & capture; rear cam NEVER mirrors!
       if (state.facingMode === "user") {
         ctx.translate(size, 0);
         ctx.scale(-1, 1);
       }
 
       if (state.activeFilter === "lofi") {
-        const tiny = 120;
+        const tiny = 128;
         const tmp = document.createElement("canvas");
         tmp.width = tiny; tmp.height = tiny;
-        const tctx = tmp.getContext("2d");
-        tctx.drawImage(video, sx, sy, side, side, 0, 0, tiny, tiny);
+        tmp.getContext("2d").drawImage(video, sx, sy, side, side, 0, 0, tiny, tiny);
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(tmp, 0, 0, size, size);
         ctx.imageSmoothingEnabled = true;
@@ -1609,7 +1782,6 @@
       }
       ctx.restore();
 
-      // Mirror twin & geometric warps
       if (state.activeFilter === "mirror_twin") {
         const half = Math.floor(size / 2);
         const leftData = ctx.getImageData(0, 0, half, size);
@@ -1622,53 +1794,30 @@
         ctx.drawImage(tmp, 0, 0, half, size);
         ctx.restore();
       } else if (["fisheye", "concave", "swirl"].includes(state.activeFilter)) {
-        const warpSize = isCapture ? size : Math.min(size, 360);
-        if (warpSize === size) {
-          buildWarpLut(state.activeFilter, size);
-          const imgData = ctx.getImageData(0, 0, size, size);
-          const src = imgData.data;
-          const out = new Uint8ClampedArray(src.length);
-          const mx = state.warpMapX, my = state.warpMapY;
-          for (let i = 0; i < size * size; i++) {
-            const si = (my[i] * size + mx[i]) * 4;
-            const di = i * 4;
-            out[di] = src[si];
-            out[di + 1] = src[si + 1];
-            out[di + 2] = src[si + 2];
-            out[di + 3] = 255;
-          }
-          imgData.data.set(out);
-          ctx.putImageData(imgData, 0, 0);
-        } else {
-          const tmp = document.createElement("canvas");
-          tmp.width = warpSize; tmp.height = warpSize;
-          const tctx = tmp.getContext("2d");
-          tctx.drawImage(ctx.canvas, 0, 0, warpSize, warpSize);
-          buildWarpLut(state.activeFilter, warpSize);
-          const imgData = tctx.getImageData(0, 0, warpSize, warpSize);
-          const src = imgData.data;
-          const out = new Uint8ClampedArray(src.length);
-          const mx = state.warpMapX, my = state.warpMapY;
-          for (let i = 0; i < warpSize * warpSize; i++) {
-            const si = (my[i] * warpSize + mx[i]) * 4;
-            const di = i * 4;
-            out[di] = src[si]; out[di+1] = src[si+1]; out[di+2] = src[si+2]; out[di+3] = 255;
-          }
-          imgData.data.set(out);
-          tctx.putImageData(imgData, 0, 0);
-          ctx.drawImage(tmp, 0, 0, size, size);
+        const warpSize = isCapture ? size : 360;
+        const tmp = document.createElement("canvas");
+        tmp.width = warpSize; tmp.height = warpSize;
+        const tctx = tmp.getContext("2d", { willReadFrequently: true });
+        tctx.drawImage(ctx.canvas, 0, 0, warpSize, warpSize);
+        buildWarpLut(state.activeFilter, warpSize);
+        const imgData = tctx.getImageData(0, 0, warpSize, warpSize);
+        const src = imgData.data;
+        const out = new Uint8ClampedArray(src.length);
+        const mx = state.warpMapX, my = state.warpMapY;
+        for (let i = 0; i < warpSize * warpSize; i++) {
+          const si = (my[i] * warpSize + mx[i]) * 4;
+          const di = i * 4;
+          out[di] = src[si]; out[di+1] = src[si+1]; out[di+2] = src[si+2]; out[di+3] = 255;
         }
+        imgData.data.set(out);
+        tctx.putImageData(imgData, 0, 0);
+        ctx.drawImage(tmp, 0, 0, size, size);
       }
 
-      // Scanlines for VHS / Laptop
       if (state.activeFilter === "vhs" || state.activeFilter === "laptop") {
         ctx.fillStyle = "rgba(0, 0, 0, 0.14)";
-        for (let y = 0; y < size; y += 6) {
-          ctx.fillRect(0, y, size, 2);
-        }
+        for (let y = 0; y < size; y += 6) ctx.fillRect(0, y, size, 2);
       }
-
-      // Vignette for retro film looks
       if (["disposable", "atlas_35mm", "home_movie", "noir"].includes(state.activeFilter)) {
         const g = ctx.createRadialGradient(size/2, size/2, size*0.28, size/2, size/2, size*0.72);
         g.addColorStop(0, "rgba(0,0,0,0)");
@@ -1676,16 +1825,11 @@
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, size, size);
       }
-
-      // Optional orange date stamp
       if (state.dateStamp) {
         const now = new Date();
-        const dd = String(now.getDate()).padStart(2, "0");
-        const mm = String(now.getMonth() + 1).padStart(2, "0");
-        const yy = String(now.getFullYear()).slice(-2);
-        const stamp = `'${yy} ${mm} ${dd}`;
+        const stamp = `'${String(now.getFullYear()).slice(-2)} ${String(now.getMonth()+1).padStart(2,"0")} ${String(now.getDate()).padStart(2,"0")}`;
         ctx.save();
-        ctx.font = `800 ${Math.round(size * 0.042)}px monospace`;
+        ctx.font = `800 ${Math.round(size * 0.04)}px monospace`;
         ctx.fillStyle = "#FF8C1A";
         ctx.shadowColor = "rgba(255, 90, 0, 0.85)";
         ctx.shadowBlur = 8;
@@ -1699,9 +1843,10 @@
       const video = $("camVideo");
       const canvas = $("camPreviewCanvas");
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      const drawSize = canvas.width; // ALWAYS MATCH 720 == 720 (ZERO BLACK MARGIN!)
       const tick = () => {
         if (video.readyState >= 2 && $("panelCam").classList.contains("active") && !$("sendStage").classList.contains("active")) {
-          renderFrameToCanvas(video, ctx, 540, false);
+          renderFrameToCanvas(video, ctx, drawSize, false);
         }
         state.rafId = requestAnimationFrame(tick);
       };
@@ -1715,30 +1860,21 @@
       out.width = size; out.height = size;
       const ctx = out.getContext("2d", { willReadFrequently: true });
       renderFrameToCanvas(video, ctx, size, true);
-
-      // Composite frame overlay if selected
       if (state.activeFrame?.url) {
         try {
           const img = new Image();
           img.crossOrigin = "anonymous";
-          await new Promise((res, rej) => {
-            img.onload = res; img.onerror = rej;
-            img.src = state.activeFrame.url;
-          });
+          await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = state.activeFrame.url; });
           ctx.drawImage(img, 0, 0, size, size);
         } catch {}
       }
-
       return new Promise((resolve) => out.toBlob((b) => resolve(b), "image/webp", 0.92));
     }
 
     async function handleShutterClick() {
       if (state.boothCapturing) return;
       const video = $("camVideo");
-      if (!video.videoWidth) {
-        showToast("Camera chưa bật, hãy chọn ảnh từ thư viện hoặc bật lại cam!");
-        return;
-      }
+      if (!video.videoWidth) return showToast("Camera chưa sẵn sàng, hãy chọn ảnh từ thư viện!");
 
       if (!state.boothMode) {
         const blob = await captureSingleBlob(1080);
@@ -1746,7 +1882,6 @@
         return;
       }
 
-      // Photobooth 2x2 mode
       state.boothCapturing = true;
       const shots = [];
       const cd = $("camCountdown");
@@ -1754,10 +1889,10 @@
         for (let i = 0; i < 4; i++) {
           cd.style.display = "flex";
           for (let sec = 2; sec >= 1; sec--) {
-            cd.textContent = `${sec}`;
+            cd.textContent = String(sec);
             await new Promise((r) => setTimeout(r, 650));
           }
-          cd.textContent = "📸";
+          cd.textContent = `${i + 1}/4`;
           const shotCanvas = document.createElement("canvas");
           shotCanvas.width = 520; shotCanvas.height = 520;
           renderFrameToCanvas(video, shotCanvas.getContext("2d", { willReadFrequently: true }), 520, true);
@@ -1766,22 +1901,14 @@
         }
         cd.style.display = "none";
 
-        // Stitch 2x2
         const grid = document.createElement("canvas");
         grid.width = 1080; grid.height = 1080;
         const gctx = grid.getContext("2d");
         gctx.fillStyle = state.activeFrame?.bg || "#111115";
         gctx.fillRect(0, 0, 1080, 1080);
         const pad = 26, gap = 18, cell = (1080 - pad * 2 - gap) / 2;
-        const coords = [
-          [pad, pad],
-          [pad + cell + gap, pad],
-          [pad, pad + cell + gap],
-          [pad + cell + gap, pad + cell + gap]
-        ];
-        shots.forEach((sc, idx) => {
-          const [cx, cy] = coords[idx];
-          gctx.drawImage(sc, cx, cy, cell, cell);
+        [[pad, pad], [pad + cell + gap, pad], [pad, pad + cell + gap], [pad + cell + gap, pad + cell + gap]].forEach(([cx, cy], idx) => {
+          gctx.drawImage(shots[idx], cx, cy, cell, cell);
         });
         if (state.activeFrame?.url) {
           try {
@@ -1799,6 +1926,95 @@
       }
     }
 
+    // =========================================================================
+    // IN-BROWSER AUTOMATIC VIDEO COMPRESSION (< 5.5 MB SQUARE MP4)
+    // =========================================================================
+    async function compressVideoInBrowser(file) {
+      if (typeof MediaRecorder === "undefined") {
+        throw new Error("Trình duyệt không hỗ trợ nén video trực tiếp.");
+      }
+      const mimeCandidates = [
+        "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+        "video/mp4;codecs=avc1",
+        "video/mp4",
+        "video/webm;codecs=vp8,opus",
+        "video/webm"
+      ];
+      const mimeType = mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
+      if (!mimeType) throw new Error("Không tìm thấy bộ mã hóa video phù hợp.");
+
+      const proc = $("camProcessing");
+      const procTxt = $("camProcessingText");
+      proc.classList.add("show");
+      procTxt.textContent = "ĐANG NÉN VIDEO 0%...";
+
+      const srcUrl = URL.createObjectURL(file);
+      const vid = document.createElement("video");
+      vid.src = srcUrl;
+      vid.playsInline = true;
+      vid.muted = true;
+      await new Promise((res, rej) => {
+        vid.onloadedmetadata = res;
+        vid.onerror = () => rej(new Error("Không đọc được file video."));
+      });
+
+      const maxDur = Math.min(vid.duration || 10, 15);
+      const targetBitsPerSec = Math.max(700000, Math.min(3400000, Math.floor((4.6 * 8 * 1024 * 1024) / Math.max(maxDur, 2))));
+      const size = 720;
+      const canvas = document.createElement("canvas");
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext("2d");
+
+      const stream = canvas.captureStream(30);
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const srcNode = audioCtx.createMediaElementSource(vid);
+        const dest = audioCtx.createMediaStreamDestination();
+        srcNode.connect(dest);
+        dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
+      } catch {}
+
+      const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: targetBitsPerSec });
+      const chunks = [];
+      recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+
+      const donePromise = new Promise((resolve) => {
+        recorder.onstop = () => resolve(new Blob(chunks, { type: mimeType.split(";")[0] }));
+      });
+
+      vid.currentTime = 0;
+      vid.muted = false;
+      recorder.start(250);
+      await vid.play().catch(async () => { vid.muted = true; await vid.play(); });
+
+      const vw = vid.videoWidth || 720;
+      const vh = vid.videoHeight || 720;
+      const side = Math.min(vw, vh);
+      const sx = (vw - side) / 2;
+      const sy = (vh - side) / 2;
+
+      await new Promise((resolve) => {
+        const drawStep = () => {
+          const pct = Math.min(99, Math.round((vid.currentTime / maxDur) * 100));
+          procTxt.textContent = `ĐANG NÉN VIDEO ${pct}%...`;
+          ctx.drawImage(vid, sx, sy, side, side, 0, 0, size, size);
+          if (vid.ended || vid.currentTime >= maxDur) {
+            vid.pause();
+            if (recorder.state !== "inactive") recorder.stop();
+            resolve();
+            return;
+          }
+          requestAnimationFrame(drawStep);
+        };
+        requestAnimationFrame(drawStep);
+      });
+
+      const outBlob = await donePromise;
+      URL.revokeObjectURL(srcUrl);
+      proc.classList.remove("show");
+      return outBlob;
+    }
+
     function enterSendStage(blob, isVideo = false) {
       if (state.capturedUrl) URL.revokeObjectURL(state.capturedUrl);
       state.capturedBlob = blob;
@@ -1811,14 +2027,14 @@
         $("sendPreviewImg").style.display = "none";
         $("sendPreviewVid").style.display = "block";
         $("sendPreviewVid").src = state.capturedUrl;
-        $("btnSaveLocal").style.display = "none";
-        $("btnAiWash").style.display = "none";
+        $("btnSaveLocal").style.visibility = "hidden";
+        $("btnAiWash").style.visibility = "hidden";
       } else {
         $("sendPreviewVid").style.display = "none";
         $("sendPreviewImg").style.display = "block";
         $("sendPreviewImg").src = state.capturedUrl;
-        $("btnSaveLocal").style.display = "inline-flex";
-        $("btnAiWash").style.display = "inline-flex";
+        $("btnSaveLocal").style.visibility = "visible";
+        $("btnAiWash").style.visibility = "visible";
       }
       updateQuotaBadges();
     }
@@ -1826,16 +2042,13 @@
     function exitSendStage() {
       $("sendStage").classList.remove("active");
       $("camStage").style.display = "flex";
-      if (state.capturedUrl) {
-        URL.revokeObjectURL(state.capturedUrl);
-        state.capturedUrl = null;
-      }
+      if (state.capturedUrl) { URL.revokeObjectURL(state.capturedUrl); state.capturedUrl = null; }
       state.capturedBlob = null;
       state.isVideo = false;
     }
 
     // =========================================================================
-    // CAPTION & OVERLAY BUILDER (150 PRESETS + GENERAL + BREAKING NEWS + POLL)
+    // CAPTION & OVERLAY BUILDER
     // =========================================================================
     function buildCaptionOverlay() {
       const txt = state.caption.text.trim();
@@ -1843,65 +2056,47 @@
       const ic = state.caption.icon.trim();
       const colors = state.caption.colors || [];
       const textColor = state.caption.textColor || "#FFFFFF";
-      const isMultiline = txt.includes("\n");
-      const maxLines = { "@type": "type.googleapis.com/google.protobuf.Int64Value", value: isMultiline ? "15" : "1" };
+      const maxLines = { "@type": "type.googleapis.com/google.protobuf.Int64Value", value: txt.includes("\n") ? "15" : "1" };
 
       if (!txt && pid === "standard" && !ic) return null;
 
       if (pid === "breaking_news") {
         const bTxt = txt || "TIN NÓNG: Đang có biến cực căng...";
         return {
-          overlay_type: "caption",
-          overlay_id: "caption:breaking_news",
-          alt_text: bTxt,
+          overlay_type: "caption", overlay_id: "caption:breaking_news", alt_text: bTxt,
           data: {
-            text: bTxt,
-            text_color: "#FFFFFF",
-            type: "breaking_news",
-            max_lines: maxLines,
+            text: bTxt, text_color: "#FFFFFF", type: "breaking_news", max_lines: maxLines,
             background: { colors: ["#E50914", "#B8000B"] },
-            icon: { type: "sf_symbol", data: "light.beacon.max.fill", color: "#FFFFFF" },
-            payload: {}
+            icon: { type: "sf_symbol", data: "light.beacon.max.fill", color: "#FFFFFF" }, payload: {}
           }
         };
       }
-
       if (pid === "gen_location") {
         const t = txt || "Hải Phòng";
         return {
-          overlay_type: "caption",
-          overlay_id: "caption:location",
-          alt_text: t,
+          overlay_type: "caption", overlay_id: "caption:location", alt_text: t,
           data: {
             text: t, text_color: "#FFFFFFE6", type: "location", max_lines: maxLines,
             background: { material_blur: "regular", colors: [] },
-            icon: { type: "sf_symbol", data: "location.fill", color: "#24B0FF" },
-            payload: {}
+            icon: { type: "sf_symbol", data: "location.fill", color: "#24B0FF" }, payload: {}
           }
         };
       }
-
       if (pid === "gen_star_sign") {
         const t = txt || "Mùa Nhân Mã";
         return {
-          overlay_type: "caption",
-          overlay_id: "caption:star_sign",
-          alt_text: t,
+          overlay_type: "caption", overlay_id: "caption:star_sign", alt_text: t,
           data: {
             text: t, text_color: "#FFFFFF", type: "star_sign", max_lines: maxLines,
             background: { image: { type: "image", data: "star_sign_background", source: "local" }, colors: ["#800080", "#B030B0"] },
-            icon: { type: "image", data: "https://storage.googleapis.com/locket-public/overlays/star_signs/Sagittarius.png", source: "url" },
-            payload: {}
+            icon: { type: "image", data: "https://storage.googleapis.com/locket-public/overlays/star_signs/Sagittarius.png", source: "url" }, payload: {}
           }
         };
       }
-
       if (pid === "gen_weather") {
         const t = txt || "25°C Trời đẹp";
         return {
-          overlay_type: "caption",
-          overlay_id: "caption:weather",
-          alt_text: t,
+          overlay_type: "caption", overlay_id: "caption:weather", alt_text: t,
           data: {
             text: t, text_color: "#FFFFFFE6", type: "weather", max_lines: maxLines,
             background: { colors: ["#370C6F", "#575CD4"] },
@@ -1910,7 +2105,6 @@
           }
         };
       }
-
       if (pid === "gen_music") {
         const mm = state.caption.musicMeta;
         const songTitle = mm?.song_title || txt || "Đang nghe nhạc chill";
@@ -1925,24 +2119,18 @@
         if (mm?.preview_url) payloadObj.preview_url = mm.preview_url;
         if (mm?.isrc) payloadObj.isrc = mm.isrc;
         return {
-          overlay_type: "caption",
-          overlay_id: "caption:music",
-          alt_text: displayTxt,
+          overlay_type: "caption", overlay_id: "caption:music", alt_text: displayTxt,
           data: {
             text: displayTxt, text_color: "#FFFFFFE6", type: "music", max_lines: maxLines,
             background: { material_blur: "ultra_thin", colors: ["#5E434D3D", "#5E434D3D"] },
-            icon: iconObj,
-            payload: payloadObj
+            icon: iconObj, payload: payloadObj
           }
         };
       }
-
       if (pid === "gen_review") {
         const t = txt || "10 điểm không có nhưng";
         return {
-          overlay_type: "caption",
-          overlay_id: "caption:review",
-          alt_text: t,
+          overlay_type: "caption", overlay_id: "caption:review", alt_text: t,
           data: {
             text: t, text_color: "#FFFFFFE6", type: "review", max_lines: maxLines,
             background: { material_blur: "regular", colors: [] },
@@ -1951,28 +2139,21 @@
           }
         };
       }
-
       if (pid === "gen_quote") {
         const t = txt || "Trích dẫn hôm nay...";
         return {
-          overlay_type: "caption",
-          overlay_id: "caption:quote",
-          alt_text: t,
+          overlay_type: "caption", overlay_id: "caption:quote", alt_text: t,
           data: {
             text: t, text_color: "#111111", type: "quote", max_lines: maxLines,
             background: { colors: ["#FFFFFF", "#F4F4F5"] },
-            icon: { type: "emoji", data: "❝" },
-            payload: {}
+            icon: { type: "emoji", data: "❝" }, payload: {}
           }
         };
       }
-
       if (pid === "poll") {
         const t = txt || "Đặt một câu hỏi...";
         return {
-          overlay_type: "caption",
-          overlay_id: "caption:poll",
-          alt_text: t,
+          overlay_type: "caption", overlay_id: "caption:poll", alt_text: t,
           data: {
             text: t, text_color: "#FFFFFF", type: "poll", max_lines: maxLines,
             background: { colors: ["#2B2B30", "#18181B"] },
@@ -1982,8 +2163,7 @@
       }
 
       const dataObj = {
-        text: txt || " ",
-        text_color: textColor,
+        text: txt || " ", text_color: textColor,
         type: colors.length ? "custom_gradient" : "standard",
         max_lines: maxLines,
         background: colors.length ? { colors } : { material_blur: "regular", colors: [] },
@@ -1991,15 +2171,12 @@
       };
       if (ic) {
         const isSf = ic.includes(".") && /^[\x00-\x7F]+$/.test(ic);
-        dataObj.icon = isSf
-          ? { type: "sf_symbol", data: ic, color: textColor }
-          : { type: "emoji", data: ic };
+        dataObj.icon = isSf ? { type: "sf_symbol", data: ic, color: textColor } : { type: "emoji", data: ic };
       }
       return {
         overlay_type: "caption",
         overlay_id: colors.length ? "caption:custom_gradient" : "caption:standard",
-        alt_text: txt,
-        data: dataObj
+        alt_text: txt, data: dataObj
       };
     }
 
@@ -2007,70 +2184,50 @@
       const t = state.caption.text.trim();
       const ic = state.caption.icon.trim();
       $("capPillText").textContent = t || "Thêm một tin nhắn";
-      $("capPillIcon").textContent = (ic && !ic.includes(".")) ? ic : "💬";
+      $("capPillIcon").textContent = (ic && !ic.includes(".")) ? ic : "";
       const pill = $("btnOpenCaptionSheet");
       const cols = state.caption.colors || [];
       if (cols.length >= 2) {
         pill.style.background = `linear-gradient(90deg, ${cols[0]}, ${cols[1]})`;
         pill.style.color = state.caption.textColor || "#fff";
       } else {
-        pill.style.background = "rgba(24, 24, 27, 0.72)";
+        pill.style.background = "rgba(24, 24, 27, 0.68)";
         pill.style.color = "#fff";
       }
     }
 
     // =========================================================================
-    // PUBLISH MOMENT TO LOCKET VIA WORKER
+    // UPLOAD & PUBLISH
     // =========================================================================
     async function uploadBlobToStorage(blob, isVideo) {
       const token = await ensureValidToken();
       const ext = isVideo ? "mp4" : "webp";
       const contentType = isVideo ? (blob.type || "video/mp4") : "image/webp";
       const randId = Array.from(crypto.getRandomValues(new Uint8Array(10)), (b) => b.toString(16).padStart(2, "0")).join("");
-      const fileName = `${randId}.${ext}`;
-
       const initRes = await fetch(`${WORKER_URL}/storage/init`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          userUid: state.session.uid,
-          fileName,
-          contentType,
-          contentLength: blob.size,
-          isVideo
-        })
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ userUid: state.session.uid, fileName: `${randId}.${ext}`, contentType, contentLength: blob.size, isVideo })
       });
       const initJson = await initRes.json();
-      if (!initRes.ok || !initJson.uploadUrl) {
-        throw new Error(initJson.error || "Không khởi tạo được upload lên Locket");
-      }
-
+      if (!initRes.ok || !initJson.uploadUrl) throw new Error(initJson.error || "Không khởi tạo được upload");
       const putRes = await fetch(`${WORKER_URL}/storage/upload`, {
         method: "PUT",
-        headers: {
-          "X-Upload-Url": initJson.uploadUrl,
-          "X-Content-Type": contentType
-        },
+        headers: { "X-Upload-Url": initJson.uploadUrl, "X-Content-Type": contentType },
         body: blob
       });
       const putJson = await putRes.json();
-      if (!putRes.ok || !putJson.downloadTokens) {
-        throw new Error(putJson.error || "Upload file thất bại (Kiểm tra dung lượng < 5.8 MB)");
-      }
-      const dlTok = String(putJson.downloadTokens).split(",")[0];
-      return `${initJson.baseStorage}/${initJson.encodedName}?alt=media&token=${dlTok}`;
+      if (!putRes.ok || !putJson.downloadTokens) throw new Error(putJson.error || "Upload thất bại (Dung lượng > 5.8 MB)");
+      return `${initJson.baseStorage}/${initJson.encodedName}?alt=media&token=${String(putJson.downloadTokens).split(",")[0]}`;
     }
 
     async function publishMoment() {
       if (!state.capturedBlob) return;
       const btn = $("btnPublishLocket");
       btn.disabled = true;
-      btn.textContent = "⏳";
+      $("sendProcessingText").textContent = "ĐANG ĐĂNG LOCKET...";
+      $("sendProcessing").classList.add("show");
       try {
-        showToast("Đang tải lên Locket...");
         const mediaUrl = await uploadBlobToStorage(state.capturedBlob, state.isVideo);
         const overlay = buildCaptionOverlay();
         const momentData = {
@@ -2081,45 +2238,35 @@
         if (state.selectedRecipient !== "all" && state.selectedRecipient !== "private") {
           momentData.recipients = [state.selectedRecipient];
         }
-        if (state.isVideo) {
-          momentData.video_url = mediaUrl;
-          momentData.thumbnail_url = mediaUrl;
-        } else {
-          momentData.thumbnail_url = mediaUrl;
-        }
-        if (state.recoveryDate) {
-          momentData.streak_recovery_yyyymmdd = state.recoveryDate.replaceAll("-", "");
-        }
+        if (state.isVideo) { momentData.video_url = mediaUrl; momentData.thumbnail_url = mediaUrl; }
+        else { momentData.thumbnail_url = mediaUrl; }
+        if (state.recoveryDate) momentData.streak_recovery_yyyymmdd = state.recoveryDate.replaceAll("-", "");
 
         await callRpc("postMomentV2", momentData);
-        showToast("Đăng Locket thành công! 💛");
+        showToast("Đã gửi lên Locket!");
         state.recoveryDate = "";
         if ($("recoveryBadge")) $("recoveryBadge").style.display = "none";
         exitSendStage();
       } catch (err) {
         showToast(`Lỗi: ${err.message}`, 3600);
       } finally {
+        $("sendProcessing").classList.remove("show");
         btn.disabled = false;
-        btn.textContent = "➤";
       }
     }
 
     // =========================================================================
-    // AI WASH (SHARE LIMIT 2/DAY OR ADMIN PIN)
+    // AI WASH (WITH "ĐANG RỬA ẢNH" BLUR OVERLAY LIKE LOCKET VIDEO)
     // =========================================================================
     async function runAiEffect(promptText) {
       if (!state.capturedBlob || state.isVideo) return;
-      if (getRemainingAiQuota() <= 0) {
-        showToast("Hết 2 lượt Rửa ảnh AI hôm nay! Nhập PIN Admin trong Hồ sơ để mở khóa.");
-        return;
-      }
+      if (getRemainingAiQuota() <= 0) return showToast("Hết 2 lượt AI hôm nay! Nhập PIN Admin trong Hồ sơ.");
       $("aiSheet").classList.remove("open");
-      showToast("✨ Đang rửa ảnh AI (giữ nguyên mặt)...", 8000);
+      $("sendProcessingText").textContent = "ĐANG RỬA ẢNH...";
+      $("sendProcessing").classList.add("show");
       try {
         const dataUrl = await new Promise((resolve) => {
-          const r = new FileReader();
-          r.onload = () => resolve(r.result);
-          r.readAsDataURL(state.capturedBlob);
+          const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(state.capturedBlob);
         });
         const res = await fetch(`${WORKER_URL}/ai/kontext`, {
           method: "POST",
@@ -2127,29 +2274,28 @@
           body: JSON.stringify({ imageBase64: dataUrl, effectPrompt: promptText })
         });
         const json = await res.json();
-        if (!res.ok || !json.imageBase64) {
-          throw new Error(json.error || "AI xử lý thất bại");
-        }
+        if (!res.ok || !json.imageBase64) throw new Error(json.error || "AI xử lý thất bại");
         const byteStr = atob(json.imageBase64);
         const bytes = new Uint8Array(byteStr.length);
         for (let i = 0; i < byteStr.length; i++) bytes[i] = byteStr.charCodeAt(i);
-        const newBlob = new Blob([bytes], { type: "image/webp" });
         consumeAiQuota();
-        enterSendStage(newBlob, false);
-        showToast("✨ Rửa ảnh AI xong rồi!");
+        enterSendStage(new Blob([bytes], { type: "image/webp" }), false);
+        showToast("Rửa ảnh AI xong!");
       } catch (err) {
         showToast(`Lỗi AI: ${err.message}`, 3500);
+      } finally {
+        $("sendProcessing").classList.remove("show");
       }
     }
 
     // =========================================================================
-    // GRID & SINGLE VIEWER (IMG_2576 & IMG_2577)
+    // GRID, VIEWER, CALENDAR, CHAT INBOX & MUSIC METADATA
     // =========================================================================
     async function loadGridPage(reset = false) {
       if (reset) {
         state.gridMoments = [];
         state.gridPageToken = null;
-        $("gridContainer").innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px;">Đang tải lưới ảnh...</div>`;
+        $("gridContainer").innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px;">Đang tải...</div>`;
       }
       try {
         const body = { page_size: SHARE_GRID_PAGE_SIZE, fetch_streak: true };
@@ -2158,8 +2304,8 @@
         const d = res?.result?.data || {};
         const items = d.moments || [];
         state.gridPageToken = d.next_page_token || null;
-        if (reset) state.gridMoments = items;
-        else state.gridMoments = [...state.gridMoments, ...items];
+        state.gridMoments = reset ? items : [...state.gridMoments, ...items];
+        $("historyBadgeCount").textContent = String(state.gridMoments.length);
         renderGrid();
       } catch (err) {
         $("gridContainer").innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--danger);padding:20px;">${err.message}</div>`;
@@ -2175,88 +2321,54 @@
       box.innerHTML = state.gridMoments.map((m, idx) => {
         const thumb = replaceFirebaseWithCDN(m.thumbnail_url || m.image_url || "");
         const cap = (m.overlays || []).find((o) => o?.data?.text)?.data?.text || m.caption || "";
-        const vidBadge = m.video_url ? `<span class="grid-badge">🎬</span>` : "";
-        const capMini = cap ? `<div class="grid-cap-mini">${cap}</div>` : "";
         return `<div class="grid-tile" data-idx="${idx}">
           <img src="${thumb}" loading="lazy" alt="moment" />
-          ${vidBadge}${capMini}
+          ${m.video_url ? `<span class="grid-badge">VIDEO</span>` : ""}
+          ${cap ? `<div class="grid-cap-mini">${cap}</div>` : ""}
         </div>`;
       }).join("");
-
       box.querySelectorAll(".grid-tile").forEach((el) => {
         el.addEventListener("click", () => {
           const m = state.gridMoments[parseInt(el.dataset.idx, 10)];
           if (m) openMomentViewer(m);
         });
       });
-
       $("btnLoadMoreGrid").style.display = state.gridPageToken ? "block" : "none";
     }
 
     async function openMomentViewer(m) {
       state.viewerMoment = m;
       const uid = m.user || "";
-      const f = state.friendMap[uid];
-      $("viewerAuthor").textContent = uid === state.session.uid ? "Bạn" : (f?.name || uid.slice(0, 8));
+      $("viewerAuthor").textContent = uid === state.session.uid ? "Bạn" : (state.friendMap[uid]?.name || uid.slice(0, 8));
       $("viewerImg").src = replaceFirebaseWithCDN(m.thumbnail_url || m.image_url || "");
       const cap = (m.overlays || []).find((o) => o?.data?.text)?.data?.text || m.caption || "";
-      if (cap) {
-        $("viewerCapBadge").style.display = "inline-flex";
-        $("viewerCapBadge").textContent = cap;
-      } else {
-        $("viewerCapBadge").style.display = "none";
-      }
+      $("viewerCapBadge").style.display = cap ? "inline-flex" : "none";
+      $("viewerCapBadge").textContent = cap;
       $("viewerViewsBox").textContent = "Đang kiểm tra lượt xem...";
       $("viewerChatRow").style.display = (uid && uid !== state.session.uid) ? "flex" : "none";
       $("momentViewerSheet").classList.add("open");
-
       try {
         const vRes = await callRpc("getMomentViews", { moment_uid: m.canonical_uid || m.uid });
         const views = vRes?.result?.data?.moment_views || [];
-        if (!views.length) {
-          $("viewerViewsBox").textContent = "Chưa có ai xem khoảnh khắc này";
-        } else {
-          const names = views.slice(0, 6).map((v) => state.friendMap[v.user]?.name || (v.user || "").slice(0, 6));
-          $("viewerViewsBox").textContent = `👁️ ${views.length} người đã xem: ${names.join(", ")}`;
-        }
+        $("viewerViewsBox").textContent = views.length
+          ? `${views.length} người đã xem: ${views.slice(0, 6).map((v) => state.friendMap[v.user]?.name || (v.user || "").slice(0, 6)).join(", ")}`
+          : "Chưa có ai xem khoảnh khắc này";
       } catch {
         $("viewerViewsBox").textContent = "Không tải được danh sách lượt xem";
       }
     }
 
-    async function reactToCurrentMoment(emoji) {
-      const m = state.viewerMoment;
-      if (!m) return;
-      try {
-        await callRpc("reactToMoment", {
-          moment_uid: m.canonical_uid || m.uid,
-          reaction: emoji,
-          intensity: { "@type": "type.googleapis.com/google.protobuf.Int64Value", value: String(SHARE_MAX_BURST) },
-          from_memory: false
-        });
-        showToast(`Đã thả ${emoji}!`);
-      } catch (err) {
-        showToast(`Lỗi thả tim: ${err.message}`);
-      }
-    }
-
-    // =========================================================================
-    // CALENDAR / KỶ NIỆM (IMG_2578)
-    // =========================================================================
     async function loadCalendarData() {
       $("calDaysGrid").innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;">Đang quét lịch...</div>`;
       try {
-        let all = [];
-        let pageTok = null;
-        let streakVal = 0;
+        let all = [], pageTok = null, streakVal = 0;
         for (let p = 0; p < SHARE_CAL_MAX_PAGES; p++) {
           const body = { page_size: 60, fetch_streak: p === 0 };
           if (pageTok) body.page_token = pageTok;
           const res = await callRpc("getLatestMomentV2", body);
           const d = res?.result?.data || {};
           if (p === 0 && d.streak) streakVal = d.streak.count || 0;
-          const items = d.moments || [];
-          all = [...all, ...items];
+          all = [...all, ...(d.moments || [])];
           pageTok = d.next_page_token;
           if (!pageTok) break;
         }
@@ -2272,7 +2384,6 @@
     function renderCalendarMonth() {
       const y = state.calYear, m = state.calMonth;
       $("calMonthTitle").textContent = `tháng ${m} ${y}`;
-
       const byDay = {};
       state.calMoments.forEach((item) => {
         const sec = item?.date?._seconds;
@@ -2280,143 +2391,33 @@
         const dt = new Date((sec + 7 * 3600) * 1000);
         if (dt.getUTCFullYear() === y && dt.getUTCMonth() + 1 === m) {
           const d = dt.getUTCDate();
-          if (!byDay[d]) byDay[d] = [];
-          byDay[d].push(item);
+          (byDay[d] = byDay[d] || []).push(item);
         }
       });
-
-      const firstDow = new Date(y, m - 1, 1).getDay(); // 0=Sun
+      const firstDow = new Date(y, m - 1, 1).getDay();
       const offset = firstDow === 0 ? 6 : firstDow - 1;
       const daysInMonth = new Date(y, m, 0).getDate();
       let html = "";
       for (let i = 0; i < offset; i++) html += `<div class="cal-cell empty"></div>`;
       for (let d = 1; d <= daysInMonth; d++) {
         const list = byDay[d] || [];
-        const iso = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const iso = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
         if (list.length) {
           const thumb = replaceFirebaseWithCDN(list[0].thumbnail_url || list[0].image_url || "");
-          const badge = list.length > 1 ? `<span class="cal-count">${list.length}</span>` : "";
-          html += `<div class="cal-cell" data-day="${d}" data-iso="${iso}"><img src="${thumb}" loading="lazy" alt="${d}" />${badge}</div>`;
+          html += `<div class="cal-cell" data-iso="${iso}"><img src="${thumb}" loading="lazy" alt="${d}" />${list.length > 1 ? `<span class="cal-count">${list.length}</span>` : ""}</div>`;
         } else {
-          html += `<div class="cal-cell" data-day="${d}" data-iso="${iso}">${d}</div>`;
+          html += `<div class="cal-cell" data-iso="${iso}">${d}</div>`;
         }
       }
       $("calDaysGrid").innerHTML = html;
       $("calDaysGrid").querySelectorAll(".cal-cell:not(.empty)").forEach((cell) => {
         cell.addEventListener("click", () => {
-          const iso = cell.dataset.iso;
-          $("streakDateInput").value = iso;
-          showToast(`Đã chọn ngày ${iso} ở mục Phục hồi chuỗi bên dưới`);
+          $("streakDateInput").value = cell.dataset.iso;
+          showToast(`Đã chọn ngày ${cell.dataset.iso}`);
         });
       });
     }
 
-    // =========================================================================
-    // DRAWERS & TABS INITIALIZATION
-    // =========================================================================
-    function renderQuickFilterStrip() {
-      const strip = $("quickFilterStrip");
-      strip.innerHTML = RETRO_FILTERS.map((f) => {
-        const act = state.activeFilter === f.id ? "active" : "";
-        return `<button class="filter-chip ${act}" data-fid="${f.id}">${f.name}</button>`;
-      }).join("");
-      strip.querySelectorAll(".filter-chip").forEach((b) => {
-        b.addEventListener("click", () => {
-          state.activeFilter = b.dataset.fid;
-          renderQuickFilterStrip();
-        });
-      });
-    }
-
-    function renderFxDrawerContent(tab = "filters") {
-      const body = $("fxDrawerBody");
-      if (tab === "filters") {
-        body.innerHTML = `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">` +
-          RETRO_FILTERS.map((f) => {
-            const act = state.activeFilter === f.id ? "active" : "";
-            return `<button class="filter-chip ${act}" data-fid="${f.id}" style="height:44px;justify-content:flex-start;border-radius:14px;">${f.name}</button>`;
-          }).join("") + `</div>`;
-        body.querySelectorAll(".filter-chip").forEach((b) => {
-          b.addEventListener("click", () => {
-            state.activeFilter = b.dataset.fid;
-            renderQuickFilterStrip();
-            renderFxDrawerContent("filters");
-          });
-        });
-      } else {
-        const clearBtn = `<button class="btn-secondary" id="btnDrawerNoFrame" style="margin-bottom:6px;">🚫 Bỏ khung viền hiện tại</button>`;
-        const cards = FRAMES_DATA.map((fr, i) => {
-          const act = state.activeFrame?.id === fr.id ? "active" : "";
-          const thumb = fr.url || "";
-          const imgEl = thumb ? `<img src="${thumb}" loading="lazy" alt="${fr.name}" />` : `<div style="width:100%;aspect-ratio:1/1;border-radius:10px;background:${fr.bg};display:flex;align-items:center;justify-content:center;font-size:20px;">🖼️</div>`;
-          return `<div class="frame-card ${act}" data-fidx="${i}">${imgEl}<span>${fr.name}</span></div>`;
-        }).join("");
-        body.innerHTML = `${clearBtn}<div class="frame-grid">${cards}</div>`;
-        $("btnDrawerNoFrame").addEventListener("click", () => {
-          applyActiveFrame(null);
-          renderFxDrawerContent("frames");
-        });
-        body.querySelectorAll(".frame-card").forEach((c) => {
-          c.addEventListener("click", () => {
-            const fr = FRAMES_DATA[parseInt(c.dataset.fidx, 10)];
-            applyActiveFrame(fr);
-            renderFxDrawerContent("frames");
-          });
-        });
-      }
-    }
-
-    function applyActiveFrame(fr) {
-      state.activeFrame = fr;
-      const ov = $("camFrameOverlay");
-      if (fr && fr.url) {
-        ov.src = fr.url;
-        ov.style.display = "block";
-        $("btnClearFrame").style.display = "inline-flex";
-      } else {
-        ov.style.display = "none";
-        ov.src = "";
-        $("btnClearFrame").style.display = fr ? "inline-flex" : "none";
-      }
-    }
-
-    function renderCaptionPresets(query = "") {
-      const q = query.trim().toLowerCase();
-      const filtered = COLOR_PRESETS.filter((p) =>
-        !q || p.name.toLowerCase().includes(q) || (p.sample_text || "").toLowerCase().includes(q)
-      );
-      const list = $("capPresetsList");
-      list.innerHTML = filtered.map((p) => {
-        const cols = p.colors || [];
-        const bgStyle = cols.length >= 2
-          ? `background:linear-gradient(90deg, ${cols[0]}, ${cols[1]});color:${p.text_color || '#fff'};`
-          : `background:#242320;color:#fff;`;
-        return `<button class="preset-item" data-pid="${p.id}" style="${bgStyle}">
-          <span>${p.name}</span>
-        </button>`;
-      }).join("");
-
-      list.querySelectorAll(".preset-item").forEach((b) => {
-        b.addEventListener("click", () => {
-          const p = COLOR_PRESETS.find((x) => x.id === b.dataset.pid);
-          if (!p) return;
-          state.caption.presetId = p.id;
-          state.caption.colors = p.colors || [];
-          state.caption.textColor = p.text_color || "#FFFFFF";
-          if (!$("capTextInput").value.trim() && p.sample_text) {
-            $("capTextInput").value = p.sample_text;
-          }
-          if (p.sample_icon && !$("capIconInput").value.trim()) {
-            $("capIconInput").value = p.sample_icon;
-          }
-          showToast(`Đã chọn: ${p.name}`);
-        });
-      });
-    }
-
-    // =========================================================================
-    // CHAT INBOX (Firestore users/{uid}/conversations)
-    // =========================================================================
     function normalizeConversationDoc(doc, myUid) {
       if (!doc || !doc.fields) return null;
       const f = doc.fields;
@@ -2428,14 +2429,12 @@
         uid: f.uid?.stringValue || (doc.name || "").split("/").pop(),
         withUser,
         unreadCount: parseInt(f.unread_count?.integerValue || "0", 10) || 0,
-        isRead: Boolean(f.is_read?.booleanValue),
         lastUpdated: toSec(f.last_updated?.timestampValue),
         otherLastReadAt: toSec(f.other_last_read_at?.timestampValue),
         latestMessage: latest ? {
           body: latest.body?.stringValue || "",
           sender: latest.sender?.stringValue || "",
           createdAt: toSec(latest.created_at?.timestampValue),
-          replyMoment: latest.reply_moment?.stringValue || null,
           thumbnailUrl: replaceFirebaseWithCDN(latest.thumbnail_url?.stringValue || "")
         } : null
       };
@@ -2452,15 +2451,14 @@
 
     async function loadChatInbox() {
       const box = $("chatListContainer");
-      box.innerHTML = `<div style="text-align:center;color:var(--muted);padding:26px;">Đang tải hộp thư Locket...</div>`;
+      box.innerHTML = `<div style="text-align:center;color:var(--muted);padding:26px;">Đang tải tin nhắn...</div>`;
       try {
         const token = await ensureValidToken();
         const url = `${WORKER_URL}/firestore/users/${state.session.uid}/conversations?pageSize=20&orderBy=${encodeURIComponent("last_updated desc")}`;
         const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error?.message || json.error || "Không tải được hộp thư");
-        const docs = json.documents || [];
-        state.chatList = docs.map((d) => normalizeConversationDoc(d, state.session.uid)).filter(Boolean);
+        state.chatList = (json.documents || []).map((d) => normalizeConversationDoc(d, state.session.uid)).filter(Boolean);
         renderChatInbox();
       } catch (err) {
         box.innerHTML = `<div style="text-align:center;color:var(--danger);padding:20px;">${err.message}</div>`;
@@ -2476,14 +2474,11 @@
       box.innerHTML = state.chatList.map((c, idx) => {
         const f = state.friendMap[c.withUser];
         const name = f?.name || (c.withUser ? c.withUser.slice(0, 8) : "Bạn bè");
-        const avt = f?.avatar
-          ? `<img src="${replaceFirebaseWithCDN(f.avatar)}" alt="${name}" />`
-          : `<span>${name.slice(0, 1).toUpperCase()}</span>`;
+        const avt = f?.avatar ? `<img src="${f.avatar}" alt="${name}" />` : `<span>${name.slice(0, 1).toUpperCase()}</span>`;
         const lm = c.latestMessage;
         const prefix = lm?.sender === state.session.uid ? "Bạn: " : "";
         const seenTag = (lm?.sender === state.session.uid && c.otherLastReadAt >= (lm?.createdAt || 0) && lm?.createdAt) ? " • ✓ Đã xem" : "";
         const bodyTxt = lm ? `${prefix}${lm.body || (lm.thumbnailUrl ? "[Ảnh/Phản hồi]" : "...")}` : "Chưa có tin nhắn";
-        const unreadHtml = c.unreadCount > 0 ? `<span class="chat-unread">${c.unreadCount}</span>` : "";
         return `<div class="chat-row" data-cidx="${idx}">
           <div class="chat-avt">${avt}</div>
           <div style="flex:1;min-width:0;">
@@ -2493,46 +2488,37 @@
             </div>
             <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">${bodyTxt}${seenTag}</div>
           </div>
-          ${unreadHtml}
+          ${c.unreadCount > 0 ? `<span class="chat-unread">${c.unreadCount}</span>` : ""}
         </div>`;
       }).join("");
 
       box.querySelectorAll(".chat-row").forEach((row) => {
         row.addEventListener("click", () => {
           const c = state.chatList[parseInt(row.dataset.cidx, 10)];
-          if (c) openChatReplySheet(c);
+          if (!c) return;
+          state.activeChat = c;
+          const name = state.friendMap[c.withUser]?.name || c.withUser.slice(0, 8);
+          $("chatReplyTitle").textContent = name;
+          const lm = c.latestMessage;
+          $("chatReplyBody").innerHTML = `
+            <div style="display:flex;gap:10px;align-items:center;">
+              ${lm?.thumbnailUrl ? `<img src="${lm.thumbnailUrl}" alt="thumb" style="width:68px;height:68px;border-radius:14px;object-fit:cover;" />` : ""}
+              <div style="flex:1;">
+                <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${lm?.sender === state.session.uid ? "Bạn" : name} • ${formatRelTime(lm?.createdAt || c.lastUpdated)}</div>
+                <div style="font-size:14px;font-weight:600;color:#fff;word-break:break-word;">${lm?.body || "(Phản hồi ảnh)"}</div>
+              </div>
+            </div>`;
+          $("chatReplyInput").value = "";
+          $("chatReplySheet").classList.add("open");
         });
       });
-    }
-
-    function openChatReplySheet(c) {
-      state.activeChat = c;
-      const f = state.friendMap[c.withUser];
-      const name = f?.name || c.withUser.slice(0, 8);
-      $("chatReplyTitle").textContent = `💬 ${name}`;
-      const lm = c.latestMessage;
-      const thumbHtml = lm?.thumbnailUrl
-        ? `<img src="${lm.thumbnailUrl}" alt="thumb" style="width:72px;height:72px;border-radius:12px;object-fit:cover;" />`
-        : "";
-      const who = lm?.sender === state.session.uid ? "Bạn" : name;
-      $("chatReplyBody").innerHTML = `
-        <div style="display:flex;gap:10px;align-items:center;">
-          ${thumbHtml}
-          <div style="flex:1;">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Tin nhắn gần nhất (${who} • ${formatRelTime(lm?.createdAt || c.lastUpdated)})</div>
-            <div style="font-size:14px;font-weight:600;color:#fff;word-break:break-word;">${lm?.body || "(Không có nội dung chữ)"}</div>
-          </div>
-        </div>`;
-      $("chatReplyInput").value = "";
-      $("chatReplySheet").classList.add("open");
     }
 
     async function fetchMusicMetadataFromWorker() {
       const link = $("musicLinkInput").value.trim();
       if (!link) return showToast("Dán link Spotify hoặc Apple Music trước nhé!");
       const btn = $("btnFetchMusic");
-      btn.disabled = true;
-      btn.textContent = "Đang lấy...";
+      btn.disabled = true; btn.textContent = "Đang kéo...";
       try {
         const res = await fetch(`${WORKER_URL}/music/metadata`, {
           method: "POST",
@@ -2546,43 +2532,167 @@
         state.caption.presetId = "gen_music";
         state.caption.colors = [];
         state.caption.textColor = "#FFFFFF";
-        const displayTxt = mm.artist ? `${mm.song_title} • ${mm.artist}` : mm.song_title;
-        $("capTextInput").value = displayTxt;
+        $("capTextInput").value = mm.artist ? `${mm.song_title} • ${mm.artist}` : mm.song_title;
         $("musicMetaTitle").textContent = mm.song_title || "";
-        $("musicMetaArtist").textContent = `${mm.artist || ""} ${mm.isrc ? `• ISRC: ${mm.isrc}` : ""}`;
-        if (mm.image_url) {
-          $("musicMetaCover").src = mm.image_url;
-          $("musicMetaCover").style.display = "block";
-        } else {
-          $("musicMetaCover").style.display = "none";
-        }
+        $("musicMetaArtist").textContent = `${mm.artist || ""} ${mm.isrc ? `• ${mm.isrc}` : ""}`;
+        $("musicMetaCover").style.display = mm.image_url ? "block" : "none";
+        if (mm.image_url) $("musicMetaCover").src = mm.image_url;
         $("musicMetaPreview").style.display = "flex";
-        showToast(`🎵 Đã kéo xong: ${mm.song_title}`);
+        showToast(`Đã kéo nhạc: ${mm.song_title}`);
       } catch (err) {
         showToast(`Lỗi kéo nhạc: ${err.message}`, 3500);
       } finally {
-        btn.disabled = false;
-        btn.textContent = "Lấy nhạc";
+        btn.disabled = false; btn.textContent = "Lấy nhạc";
       }
+    }
+
+    // =========================================================================
+    // INLINE CAMERA CAROUSEL & CATEGORIZED FX SHEET (MATCHES LOCKET VIDEO)
+    // =========================================================================
+    function renderInlineCamCarousel() {
+      const scroll = $("camCarouselScroll");
+      scroll.innerHTML = RETRO_FILTERS.map((f) => {
+        const act = state.activeFilter === f.id ? "active" : "";
+        return `<button class="cam-orb ${act}" data-fid="${f.id}" title="${f.name}">${f.icon}</button>`;
+      }).join("");
+      scroll.querySelectorAll(".cam-orb").forEach((b) => {
+        b.addEventListener("click", () => selectFilter(b.dataset.fid));
+      });
+    }
+
+    function selectFilter(fid) {
+      state.activeFilter = fid;
+      const obj = RETRO_FILTERS.find((x) => x.id === fid);
+      const lbl = $("activeFilterLabel");
+      if (obj && fid !== "none") {
+        lbl.textContent = obj.name.toUpperCase();
+        lbl.style.display = "block";
+      } else {
+        lbl.style.display = "none";
+      }
+      renderInlineCamCarousel();
+    }
+
+    function applyActiveFrame(fr) {
+      state.activeFrame = fr;
+      const ov = $("camFrameOverlay");
+      if (fr && fr.url) {
+        ov.src = fr.url; ov.style.display = "block";
+        $("btnClearFrame").style.display = "inline-flex";
+      } else {
+        ov.style.display = "none"; ov.src = "";
+        $("btnClearFrame").style.display = "none";
+      }
+    }
+
+    function renderFxSheet(searchQ = "") {
+      const q = searchQ.trim().toLowerCase();
+      const body = $("fxDrawerBody");
+
+      if (q) {
+        const matches = FRAMES_DATA.filter((fr) => fr.name.toLowerCase().includes(q) || fr.category.toLowerCase().includes(q));
+        body.innerHTML = `<div class="fx-section-title">Kết quả khung viền (${matches.length})</div>
+          <div class="frame-grid">${matches.slice(0, 60).map((fr) => {
+            const act = state.activeFrame?.id === fr.id ? "active" : "";
+            const imgEl = fr.url ? `<img src="${fr.url}" loading="lazy" alt="${fr.name}" />` : `<div style="width:100%;height:100%;background:${fr.bg};"></div>`;
+            return `<div class="fx-tile ${act}" data-frame-id="${fr.id}"><div class="fx-thumb">${imgEl}</div><span>${fr.name}</span></div>`;
+          }).join("")}</div>`;
+      } else {
+        const warps = RETRO_FILTERS.filter((f) => f.group === "warp");
+        const films = RETRO_FILTERS.filter((f) => f.group === "film");
+
+        // Group 231 frames by category
+        const catMap = {};
+        FRAMES_DATA.forEach((fr) => {
+          (catMap[fr.category] = catMap[fr.category] || []).push(fr);
+        });
+
+        let html = `
+          <div>
+            <div class="fx-section-title">Biến hình & Gương</div>
+            <div class="fx-hscroll">
+              <div class="fx-tile ${state.activeFilter === "none" ? "active" : ""}" data-fid="none"><div class="fx-thumb">⚪</div><span>Gốc</span></div>
+              ${warps.map((f) => `<div class="fx-tile ${state.activeFilter === f.id ? "active" : ""}" data-fid="${f.id}"><div class="fx-thumb">${f.icon}</div><span>${f.name}</span></div>`).join("")}
+            </div>
+          </div>
+          <div>
+            <div class="fx-section-title">Màu Phim & Máy ảnh</div>
+            <div class="fx-hscroll">
+              ${films.map((f) => `<div class="fx-tile ${state.activeFilter === f.id ? "active" : ""}" data-fid="${f.id}"><div class="fx-thumb">${f.icon}</div><span>${f.name}</span></div>`).join("")}
+            </div>
+          </div>
+        `;
+
+        Object.entries(catMap).forEach(([cat, list]) => {
+          html += `
+            <div>
+              <div class="fx-section-title">${cat} (${list.length})</div>
+              <div class="fx-hscroll">
+                ${list.slice(0, 30).map((fr) => {
+                  const act = state.activeFrame?.id === fr.id ? "active" : "";
+                  const imgEl = fr.url ? `<img src="${fr.url}" loading="lazy" alt="${fr.name}" />` : `<div style="width:100%;height:100%;background:${fr.bg};"></div>`;
+                  return `<div class="fx-tile ${act}" data-frame-id="${fr.id}"><div class="fx-thumb">${imgEl}</div><span>${fr.name}</span></div>`;
+                }).join("")}
+              </div>
+            </div>`;
+        });
+
+        body.innerHTML = html;
+      }
+
+      body.querySelectorAll("[data-fid]").forEach((el) => {
+        el.addEventListener("click", () => {
+          selectFilter(el.dataset.fid);
+          renderFxSheet($("fxFrameSearch").value);
+        });
+      });
+      body.querySelectorAll("[data-frame-id]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const fr = FRAMES_DATA.find((x) => x.id === el.dataset.frameId);
+          applyActiveFrame(state.activeFrame?.id === fr?.id ? null : fr);
+          renderFxSheet($("fxFrameSearch").value);
+        });
+      });
+    }
+
+    function renderCaptionPresets(query = "") {
+      const q = query.trim().toLowerCase();
+      const filtered = COLOR_PRESETS.filter((p) => !q || p.name.toLowerCase().includes(q) || (p.sample_text || "").toLowerCase().includes(q));
+      const list = $("capPresetsList");
+      list.innerHTML = filtered.map((p) => {
+        const cols = p.colors || [];
+        const bgStyle = cols.length >= 2
+          ? `background:linear-gradient(90deg, ${cols[0]}, ${cols[1]});color:${p.text_color || '#fff'};`
+          : `background:rgba(255,255,255,0.08);color:#fff;`;
+        return `<button class="preset-item" data-pid="${p.id}" style="${bgStyle}"><span>${p.name}</span></button>`;
+      }).join("");
+      list.querySelectorAll(".preset-item").forEach((b) => {
+        b.addEventListener("click", () => {
+          const p = COLOR_PRESETS.find((x) => x.id === b.dataset.pid);
+          if (!p) return;
+          state.caption.presetId = p.id;
+          state.caption.colors = p.colors || [];
+          state.caption.textColor = p.text_color || "#FFFFFF";
+          if (!$("capTextInput").value.trim() && p.sample_text) $("capTextInput").value = p.sample_text;
+          if (p.sample_icon && !$("capIconInput").value.trim()) $("capIconInput").value = p.sample_icon;
+          showToast(`Đã chọn: ${p.name}`);
+        });
+      });
     }
 
     function switchTab(tabName) {
       document.querySelectorAll(".view-panel").forEach((p) => p.classList.remove("active"));
       document.querySelectorAll(".dock-btn").forEach((b) => b.classList.remove("active"));
       if (tabName === "cam") {
-        $("panelCam").classList.add("active");
-        $("dockCam").classList.add("active");
+        $("panelCam").classList.add("active"); $("dockCam").classList.add("active");
       } else if (tabName === "grid") {
-        $("panelGrid").classList.add("active");
-        $("dockGrid").classList.add("active");
+        $("panelGrid").classList.add("active"); $("dockGrid").classList.add("active");
         if (!state.gridMoments.length) loadGridPage(true);
       } else if (tabName === "cal") {
-        $("panelCal").classList.add("active");
-        $("dockCal").classList.add("active");
+        $("panelCal").classList.add("active"); $("dockCal").classList.add("active");
         if (!state.calMoments.length) loadCalendarData();
       } else if (tabName === "chat") {
-        $("panelChat").classList.add("active");
-        $("dockChat").classList.add("active");
+        $("panelChat").classList.add("active"); $("dockChat").classList.add("active");
         if (!state.chatList.length) loadChatInbox();
       } else if (tabName === "profile") {
         $("panelProfile").classList.add("active");
@@ -2590,34 +2700,24 @@
     }
 
     // =========================================================================
-    // BOOT & EVENT BINDINGS
+    // EVENT BINDINGS & BOOT
     // =========================================================================
     function bindEvents() {
-      // Login
       $("loginSubmitBtn").addEventListener("click", async () => {
-        const email = $("loginEmail").value.trim();
-        const pass = $("loginPass").value;
-        if (!email || !pass) {
-          $("loginStatus").textContent = "Vui lòng nhập đủ email và mật khẩu.";
-          return;
-        }
-        $("loginSubmitBtn").disabled = true;
-        $("loginStatus").textContent = "Đang đăng nhập...";
+        const email = $("loginEmail").value.trim(), pass = $("loginPass").value;
+        if (!email || !pass) { $("loginStatus").textContent = "Vui lòng nhập đủ email và mật khẩu."; return; }
+        $("loginSubmitBtn").disabled = true; $("loginStatus").textContent = "Đang đăng nhập...";
         try {
           await loginWithEmailPass(email, pass);
           $("loginScreen").classList.remove("active");
           onAuthenticated();
         } catch (err) {
           $("loginStatus").textContent = err.message;
-        } finally {
-          $("loginSubmitBtn").disabled = false;
-        }
+        } finally { $("loginSubmitBtn").disabled = false; }
       });
 
-      // Dock & Header
-      document.querySelectorAll(".dock-btn").forEach((b) => {
-        b.addEventListener("click", () => switchTab(b.dataset.tab));
-      });
+      document.querySelectorAll(".dock-btn").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+      $("btnHistoryShortcut").addEventListener("click", () => switchTab("grid"));
       $("btnTopAvatar").addEventListener("click", () => switchTab("profile"));
       $("btnTopTools").addEventListener("click", () => switchTab("profile"));
       $("btnTopTitle").addEventListener("click", () => switchTab("cam"));
@@ -2640,30 +2740,56 @@
       $("btnClearFrame").addEventListener("click", () => applyActiveFrame(null));
       $("btnShutter").addEventListener("click", handleShutterClick);
 
-      // File pick (Image or < 6MB Video)
+      // Inside-camera inline filter carousel toggle
+      $("btnToggleCamFilters").addEventListener("click", () => {
+        renderInlineCamCarousel();
+        $("camCornerBar").style.display = "none";
+        $("camInlineCarousel").classList.add("open");
+      });
+      $("btnCloseInlineCarousel").addEventListener("click", () => {
+        $("camInlineCarousel").classList.remove("open");
+        $("camCornerBar").style.display = "flex";
+      });
+
+      // FX & Frames Sheet
+      $("btnOpenFxDrawer").addEventListener("click", () => {
+        renderFxSheet($("fxFrameSearch").value);
+        $("fxDrawerSheet").classList.add("open");
+      });
+      $("fxFrameSearch").addEventListener("input", (e) => renderFxSheet(e.target.value));
+      $("btnCloseFxDrawer").addEventListener("click", () => $("fxDrawerSheet").classList.remove("open"));
+
+      // File pick (Auto-compress videos > 5.5 MB right on iPhone!)
       $("filePickInput").addEventListener("change", async (e) => {
         const file = e.target.files?.[0];
         e.target.value = "";
         if (!file) return;
-        const isVid = file.type.startsWith("video/");
-        if (isVid) {
-          if (file.size > 5.8 * 1024 * 1024) {
-            showToast("Video vượt quá 5.8 MB! Locket sẽ từ chối, hãy cắt ngắn hơn nhé.", 3600);
+        if (file.type.startsWith("video/")) {
+          if (file.size <= 5.6 * 1024 * 1024) {
+            enterSendStage(file, true);
             return;
           }
-          enterSendStage(file, true);
+          try {
+            const compressed = await compressVideoInBrowser(file);
+            if (compressed.size > 5.8 * 1024 * 1024) {
+              showToast("Video sau nén vẫn > 5.8 MB, hãy chọn đoạn ngắn hơn (≤ 12 giây) nhé!", 3800);
+              return;
+            }
+            showToast(`Đã nén gọn còn ${(compressed.size / (1024 * 1024)).toFixed(1)} MB!`);
+            enterSendStage(compressed, true);
+          } catch (err) {
+            $("camProcessing").classList.remove("show");
+            showToast(`Không nén được video trên máy: ${err.message}`, 3600);
+          }
           return;
         }
-        // Resize square 1080x1080 WebP cleanly
         const imgUrl = URL.createObjectURL(file);
         const img = new Image();
         img.onload = () => {
           const side = Math.min(img.width, img.height);
-          const sx = (img.width - side) / 2;
-          const sy = (img.height - side) / 2;
           const c = document.createElement("canvas");
           c.width = 1080; c.height = 1080;
-          c.getContext("2d").drawImage(img, sx, sy, side, side, 0, 0, 1080, 1080);
+          c.getContext("2d").drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 1080, 1080);
           URL.revokeObjectURL(imgUrl);
           c.toBlob((b) => enterSendStage(b, false), "image/webp", 0.92);
         };
@@ -2676,29 +2802,10 @@
       $("btnSaveLocal").addEventListener("click", () => {
         if (!state.capturedUrl) return;
         const a = document.createElement("a");
-        a.href = state.capturedUrl;
-        a.download = `locket_${Date.now()}.webp`;
-        a.click();
+        a.href = state.capturedUrl; a.download = `locket_${Date.now()}.webp`; a.click();
       });
 
-      // FX Drawer
-      $("btnOpenFxDrawer").addEventListener("click", () => {
-        renderFxDrawerContent("filters");
-        $("fxDrawerSheet").classList.add("open");
-      });
-      $("btnCloseFxDrawer").addEventListener("click", () => $("fxDrawerSheet").classList.remove("open"));
-      $("fxTabFilters").addEventListener("click", () => {
-        $("fxTabFilters").classList.add("active");
-        $("fxTabFrames").classList.remove("active");
-        renderFxDrawerContent("filters");
-      });
-      $("fxTabFrames").addEventListener("click", () => {
-        $("fxTabFrames").classList.add("active");
-        $("fxTabFilters").classList.remove("active");
-        renderFxDrawerContent("frames");
-      });
-
-      // Caption Sheet
+      // Caption & Music
       $("btnOpenCaptionSheet").addEventListener("click", () => {
         $("capTextInput").value = state.caption.text;
         $("capIconInput").value = state.caption.icon;
@@ -2712,12 +2819,18 @@
         updateCaptionPillUI();
         $("captionSheet").classList.remove("open");
       });
+      $("btnFetchMusic").addEventListener("click", fetchMusicMetadataFromWorker);
+      $("btnClearMusicMeta").addEventListener("click", () => {
+        state.caption.musicMeta = null;
+        $("musicMetaPreview").style.display = "none";
+        $("musicLinkInput").value = "";
+      });
 
-      // AI Wash Sheet
+      // AI Wash
       $("btnAiWash").addEventListener("click", () => {
         $("aiPresetList").innerHTML = AI_STYLES.map((s, idx) =>
-          `<button class="btn-secondary" data-aidx="${idx}" style="text-align:left;border-radius:14px;">${s.name}</button>`
-        ).join("") + `<button id="btnRunCustomAi" class="btn-primary" style="margin-top:6px;">✨ Chạy mô tả tự nhập ở trên</button>`;
+          `<button class="btn-secondary" data-aidx="${idx}" style="text-align:left;border-radius:16px;padding:12px 14px;">${s.name}</button>`
+        ).join("") + `<button id="btnRunCustomAi" class="btn-primary" style="margin-top:6px;">Chạy mô tả tự nhập ở trên</button>`;
         $("aiPresetList").querySelectorAll("[data-aidx]").forEach((b) => {
           b.addEventListener("click", () => runAiEffect(AI_STYLES[parseInt(b.dataset.aidx, 10)].prompt));
         });
@@ -2730,117 +2843,93 @@
       });
       $("btnCloseAiSheet").addEventListener("click", () => $("aiSheet").classList.remove("open"));
 
-      // Grid & Viewer
+      // Grid, Viewer, Chat, Calendar, Profile
       $("btnReloadGrid").addEventListener("click", () => loadGridPage(true));
       $("btnLoadMoreGrid").addEventListener("click", () => loadGridPage(false));
       $("btnCloseViewer").addEventListener("click", () => $("momentViewerSheet").classList.remove("open"));
       document.querySelectorAll(".react-quick-btn").forEach((b) => {
-        b.addEventListener("click", () => reactToCurrentMoment(b.dataset.emoji));
+        b.addEventListener("click", async () => {
+          const m = state.viewerMoment;
+          if (!m) return;
+          try {
+            await callRpc("reactToMoment", {
+              moment_uid: m.canonical_uid || m.uid,
+              reaction: b.dataset.emoji,
+              intensity: { "@type": "type.googleapis.com/google.protobuf.Int64Value", value: String(SHARE_MAX_BURST) },
+              from_memory: false
+            });
+            showToast(`Đã thả ${b.dataset.emoji}`);
+          } catch (err) { showToast(`Lỗi: ${err.message}`); }
+        });
       });
       $("btnSendViewerChat").addEventListener("click", async () => {
-        const msg = $("viewerChatInput").value.trim();
-        const m = state.viewerMoment;
+        const msg = $("viewerChatInput").value.trim(), m = state.viewerMoment;
         if (!msg || !m?.user) return;
         try {
           await callRpc("sendChatMessageV2", {
-            receiver_uid: m.user,
-            client_token: crypto.randomUUID(),
-            msg,
-            moment_uid: m.canonical_uid || m.uid || null,
-            from_memory: false
+            receiver_uid: m.user, client_token: crypto.randomUUID(), msg,
+            moment_uid: m.canonical_uid || m.uid || null, from_memory: false
           });
-          $("viewerChatInput").value = "";
-          showToast("Đã gửi tin nhắn tới Locket!");
-        } catch (err) {
-          showToast(`Lỗi gửi chat: ${err.message}`);
-        }
+          $("viewerChatInput").value = ""; showToast("Đã gửi tin nhắn!");
+        } catch (err) { showToast(`Lỗi: ${err.message}`); }
       });
 
-      // Calendar & Recovery
+      $("btnReloadChat").addEventListener("click", loadChatInbox);
+      $("btnCloseChatReply").addEventListener("click", () => $("chatReplySheet").classList.remove("open"));
+      $("btnSendChatReply").addEventListener("click", async () => {
+        const msg = $("chatReplyInput").value.trim(), c = state.activeChat;
+        if (!msg || !c?.withUser) return;
+        $("btnSendChatReply").disabled = true;
+        try {
+          await callRpc("sendChatMessageV2", {
+            receiver_uid: c.withUser, client_token: crypto.randomUUID(), msg, moment_uid: null, from_memory: false
+          });
+          $("chatReplyInput").value = "";
+          $("chatReplySheet").classList.remove("open");
+          showToast("Đã gửi tin nhắn!");
+          loadChatInbox();
+        } catch (err) { showToast(`Lỗi: ${err.message}`); }
+        finally { $("btnSendChatReply").disabled = false; }
+      });
+
       $("btnCalPrev").addEventListener("click", () => {
-        state.calMonth -= 1;
-        if (state.calMonth < 1) { state.calMonth = 12; state.calYear -= 1; }
+        state.calMonth -= 1; if (state.calMonth < 1) { state.calMonth = 12; state.calYear -= 1; }
         renderCalendarMonth();
       });
       $("btnCalNext").addEventListener("click", () => {
-        state.calMonth += 1;
-        if (state.calMonth > 12) { state.calMonth = 1; state.calYear += 1; }
+        state.calMonth += 1; if (state.calMonth > 12) { state.calMonth = 1; state.calYear += 1; }
         renderCalendarMonth();
       });
       $("btnSetRecoveryDate").addEventListener("click", () => {
         const val = $("streakDateInput").value;
         if (!val) return showToast("Chọn ngày cần phục hồi trước nhé!");
         state.recoveryDate = val;
-        $("recoveryBadge").textContent = `✅ Ảnh đăng tiếp theo sẽ tính vào ngày ${val}`;
+        $("recoveryBadge").textContent = `Ảnh đăng tiếp theo sẽ tính vào ngày ${val}`;
         $("recoveryBadge").style.display = "block";
         showToast(`Đã gắn ngày phục hồi ${val}`);
       });
 
-      // Profile / Admin PIN / Logout
       $("btnUnlockAdmin").addEventListener("click", () => {
         if ($("adminPinInput").value.trim() === ADMIN_PIN) {
-          state.isAdmin = true;
-          updateQuotaBadges();
-          $("adminStatusLabel").textContent = "✅ Đã mở khóa Admin: Không giới hạn lượt Rửa ảnh AI!";
+          state.isAdmin = true; updateQuotaBadges();
+          $("adminStatusLabel").textContent = "Đã mở khóa Admin: Không giới hạn lượt AI!";
           $("adminStatusLabel").style.color = "var(--ok)";
           showToast("Mở khóa Admin thành công!");
-        } else {
-          showToast("Sai mã PIN Admin!");
-        }
+        } else showToast("Sai mã PIN Admin!");
       });
       $("btnLogout").addEventListener("click", () => {
         try { localStorage.removeItem("locket_share_session_v1"); } catch {}
-        state.session = null;
-        stopCamera();
+        state.session = null; stopCamera();
         $("loginScreen").classList.add("active");
       });
 
-      // Chat Inbox & Reply Sheet
-      $("btnReloadChat").addEventListener("click", loadChatInbox);
-      $("btnCloseChatReply").addEventListener("click", () => $("chatReplySheet").classList.remove("open"));
-      $("btnSendChatReply").addEventListener("click", async () => {
-        const msg = $("chatReplyInput").value.trim();
-        const c = state.activeChat;
-        if (!msg || !c?.withUser) return;
-        $("btnSendChatReply").disabled = true;
-        try {
-          await callRpc("sendChatMessageV2", {
-            receiver_uid: c.withUser,
-            client_token: crypto.randomUUID(),
-            msg,
-            moment_uid: null,
-            from_memory: false
-          });
-          $("chatReplyInput").value = "";
-          $("chatReplySheet").classList.remove("open");
-          showToast("Đã gửi tin nhắn! 💬");
-          loadChatInbox();
-        } catch (err) {
-          showToast(`Lỗi gửi chat: ${err.message}`);
-        } finally {
-          $("btnSendChatReply").disabled = false;
-        }
-      });
-
-      // Auto Music Metadata Fetch
-      $("btnFetchMusic").addEventListener("click", fetchMusicMetadataFromWorker);
-      $("btnClearMusicMeta").addEventListener("click", () => {
-        state.caption.musicMeta = null;
-        $("musicMetaPreview").style.display = "none";
-        $("musicLinkInput").value = "";
-      });
-
-      // Backdrop tap close
       document.querySelectorAll(".sheet-backdrop").forEach((bd) => {
-        bd.addEventListener("click", (e) => {
-          if (e.target === bd) bd.classList.remove("open");
-        });
+        bd.addEventListener("click", (e) => { if (e.target === bd) bd.classList.remove("open"); });
       });
     }
 
     function onAuthenticated() {
       updateQuotaBadges();
-      renderQuickFilterStrip();
       renderFriendsStrip();
       startCamera();
       loadUserProfileAndFriends();
