@@ -427,6 +427,10 @@
       justify-content: center;
       box-shadow: 0 0 28px rgba(245, 184, 0, 0.22);
       transition: transform 0.14s var(--spring);
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      touch-action: none !important;
     }
     .shutter-btn:active { transform: scale(0.9); }
     .shutter-inner {
@@ -1698,7 +1702,12 @@
         body: JSON.stringify({ data: bodyData })
       });
       const json = await res.json();
-      if (!res.ok || json.errors?.length) throw new Error(json.error || JSON.stringify(json.errors || json));
+      if (!res.ok || json.errors?.length) {
+        const errMsg = typeof json.error === "string"
+          ? json.error
+          : (json.error?.message || JSON.stringify(json.errors || json.error || json));
+        throw new Error(errMsg);
+      }
       return json;
     }
 
@@ -2440,6 +2449,28 @@
       return `${initJson.baseStorage}/${initJson.encodedName}?alt=media&token=${String(putJson.downloadTokens).split(",")[0]}`;
     }
 
+    async function extractVideoThumbBlob(videoBlob) {
+      const url = URL.createObjectURL(videoBlob);
+      try {
+        const v = document.createElement("video");
+        v.src = url; v.muted = true; v.playsInline = true;
+        await new Promise((res, rej) => {
+          v.onloadeddata = res;
+          v.onerror = rej;
+        });
+        v.currentTime = Math.min(0.2, v.duration || 0);
+        await new Promise((res) => { v.onseeked = res; setTimeout(res, 250); });
+        const c = document.createElement("canvas");
+        c.width = 720; c.height = 720;
+        const vw = v.videoWidth || 720, vh = v.videoHeight || 720;
+        const side = Math.min(vw, vh);
+        c.getContext("2d").drawImage(v, (vw - side) / 2, (vh - side) / 2, side, side, 0, 0, 720, 720);
+        return await new Promise((res) => c.toBlob((b) => res(b), "image/webp", 0.88));
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
     async function publishMoment() {
       if (!state.capturedBlob) return;
       const btn = $("btnPublishLocket");
@@ -2447,18 +2478,29 @@
       $("sendProcessingText").textContent = "ĐANG ĐĂNG LOCKET...";
       $("sendProcessing").classList.add("show");
       try {
-        const mediaUrl = await uploadBlobToStorage(state.capturedBlob, state.isVideo);
+        const isPriv = state.selectedRecipient === "private";
+        const isAll = state.selectedRecipient === "all";
+        const recips = (!isPriv && !isAll) ? [state.selectedRecipient] : [];
         const overlay = buildCaptionOverlay();
+        const hex32 = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
         const momentData = {
-          show_personally: state.selectedRecipient === "private",
-          sent_to_all: state.selectedRecipient === "all",
-          overlays: overlay ? [overlay] : []
+          overlays: overlay ? [overlay] : [],
+          sent_to_self_only: isPriv,
+          sent_to_all: isAll,
+          recipients: recips,
+          md5: `${hex32}_${Math.floor(Date.now() / 1000)}`
         };
-        if (state.selectedRecipient !== "all" && state.selectedRecipient !== "private") {
-          momentData.recipients = [state.selectedRecipient];
+        if (state.isVideo) {
+          const thumbBlob = await extractVideoThumbBlob(state.capturedBlob);
+          const [thumbUrl, videoUrl] = await Promise.all([
+            uploadBlobToStorage(thumbBlob, false),
+            uploadBlobToStorage(state.capturedBlob, true)
+          ]);
+          momentData.thumbnail_url = thumbUrl;
+          momentData.video_url = videoUrl;
+        } else {
+          momentData.thumbnail_url = await uploadBlobToStorage(state.capturedBlob, false);
         }
-        if (state.isVideo) { momentData.video_url = mediaUrl; momentData.thumbnail_url = mediaUrl; }
-        else { momentData.thumbnail_url = mediaUrl; }
         if (state.recoveryDate) momentData.streak_recovery_yyyymmdd = state.recoveryDate.replaceAll("-", "");
 
         await callRpc("postMomentV2", momentData);
@@ -2485,7 +2527,20 @@
       $("sendProcessing").classList.add("show");
       try {
         const dataUrl = await new Promise((resolve) => {
-          const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(state.capturedBlob);
+          const u = URL.createObjectURL(state.capturedBlob);
+          const img = new Image();
+          img.onload = () => {
+            const c = document.createElement("canvas");
+            c.width = 768; c.height = 768;
+            c.getContext("2d").drawImage(img, 0, 0, 768, 768);
+            URL.revokeObjectURL(u);
+            resolve(c.toDataURL("image/jpeg", 0.85));
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(u);
+            const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(state.capturedBlob);
+          };
+          img.src = u;
         });
         const res = await fetch(`${WORKER_URL}/ai/kontext`, {
           method: "POST",
@@ -2510,6 +2565,32 @@
     // =========================================================================
     // GRID, VIEWER, CALENDAR, CHAT INBOX & MUSIC METADATA
     // =========================================================================
+    function parseFirestoreVal(v) {
+      if (!v || typeof v !== "object") return v;
+      if ("stringValue" in v) return v.stringValue;
+      if ("integerValue" in v) return parseInt(v.integerValue, 10);
+      if ("doubleValue" in v) return parseFloat(v.doubleValue);
+      if ("booleanValue" in v) return Boolean(v.booleanValue);
+      if ("timestampValue" in v) return { _seconds: Math.floor(new Date(v.timestampValue).getTime() / 1000) };
+      if ("arrayValue" in v) return (v.arrayValue.values || []).map(parseFirestoreVal);
+      if ("mapValue" in v) {
+        const out = {};
+        const fields = v.mapValue.fields || {};
+        for (const k of Object.keys(fields)) out[k] = parseFirestoreVal(fields[k]);
+        return out;
+      }
+      return null;
+    }
+
+    function parseFirestoreMomentDoc(doc) {
+      const f = doc?.fields || {};
+      const out = {};
+      for (const k of Object.keys(f)) out[k] = parseFirestoreVal(f[k]);
+      if (!out.canonical_uid && doc?.name) out.canonical_uid = doc.name.split("/").pop();
+      if (!out.uid) out.uid = out.canonical_uid;
+      return out;
+    }
+
     async function loadGridPage(reset = false) {
       if (reset) {
         state.gridMoments = [];
@@ -2517,12 +2598,14 @@
         $("gridContainer").innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px;">Đang tải...</div>`;
       }
       try {
-        const body = { page_size: SHARE_GRID_PAGE_SIZE, fetch_streak: true };
-        if (state.gridPageToken) body.page_token = state.gridPageToken;
-        const res = await callRpc("getLatestMomentV2", body);
-        const d = res?.result?.data || {};
-        const items = d.moments || [];
-        state.gridPageToken = d.next_page_token || null;
+        const token = await ensureValidToken();
+        let url = `${WORKER_URL}/firestore-locket/history/${state.session.uid}/entries?orderBy=${encodeURIComponent("date desc")}&pageSize=${SHARE_GRID_PAGE_SIZE}`;
+        if (state.gridPageToken) url += `&pageToken=${encodeURIComponent(state.gridPageToken)}`;
+        const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
+        const j = await res.json();
+        if (!res.ok) throw new Error(j.error?.message || j.error || "Không tải được Lưới");
+        const items = (j.documents || []).map(parseFirestoreMomentDoc);
+        state.gridPageToken = j.nextPageToken || null;
         state.gridMoments = reset ? items : [...state.gridMoments, ...items];
         $("historyBadgeCount").textContent = String(state.gridMoments.length);
         renderGrid();
@@ -2580,15 +2663,22 @@
     async function loadCalendarData() {
       $("calDaysGrid").innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;">Đang quét lịch...</div>`;
       try {
+        const token = await ensureValidToken();
         let all = [], pageTok = null, streakVal = 0;
+        try {
+          const stRes = await callRpc("getLatestMomentV2", { excluded_users: [], fetch_streak: true, should_count_missed_moments: false });
+          const stObj = stRes?.result?.streak || stRes?.result?.data?.streak;
+          if (stObj) streakVal = parseInt(stObj.count || stObj.current || "0", 10) || 0;
+        } catch {}
+
         for (let p = 0; p < SHARE_CAL_MAX_PAGES; p++) {
-          const body = { page_size: 60, fetch_streak: p === 0 };
-          if (pageTok) body.page_token = pageTok;
-          const res = await callRpc("getLatestMomentV2", body);
-          const d = res?.result?.data || {};
-          if (p === 0 && d.streak) streakVal = d.streak.count || 0;
-          all = [...all, ...(d.moments || [])];
-          pageTok = d.next_page_token;
+          let url = `${WORKER_URL}/firestore-locket/history/${state.session.uid}/entries?orderBy=${encodeURIComponent("date desc")}&pageSize=60`;
+          if (pageTok) url += `&pageToken=${encodeURIComponent(pageTok)}`;
+          const r = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.error?.message || j.error || "Không tải được lịch");
+          all = [...all, ...((j.documents || []).map(parseFirestoreMomentDoc))];
+          pageTok = j.nextPageToken || null;
           if (!pageTok) break;
         }
         state.calMoments = all;
@@ -3089,6 +3179,8 @@
       let holdTimer = null;
       let didHold = false;
       const shutterEl = $("btnShutter");
+      shutterEl.addEventListener("contextmenu", (e) => e.preventDefault());
+      shutterEl.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
       shutterEl.addEventListener("pointerdown", (e) => {
         e.preventDefault();
         didHold = false;
