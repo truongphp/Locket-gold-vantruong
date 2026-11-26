@@ -1674,9 +1674,9 @@
       return null;
     }
 
-    async function ensureValidToken() {
+    async function ensureValidToken(forceRefresh = false) {
       if (!state.session) throw new Error("Chưa đăng nhập");
-      if (state.session.idToken && state.session.expiresAt && Date.now() < state.session.expiresAt - 120000) {
+      if (!forceRefresh && state.session.idToken && state.session.expiresAt && Date.now() < state.session.expiresAt - 120000) {
         return state.session.idToken;
       }
       const res = await fetch(`${WORKER_URL}/auth/refresh`, {
@@ -2469,8 +2469,8 @@
     // =========================================================================
     // UPLOAD & PUBLISH
     // =========================================================================
-    async function uploadBlobToStorage(blob, isVideo) {
-      const token = await ensureValidToken();
+    async function uploadBlobToStorage(blob, isVideo, retryAuth = true) {
+      const token = await ensureValidToken(!retryAuth);
       const ext = isVideo ? "mp4" : "webp";
       const contentType = isVideo ? (blob.type || "video/mp4") : "image/webp";
       const randId = Array.from(crypto.getRandomValues(new Uint8Array(10)), (b) => b.toString(16).padStart(2, "0")).join("");
@@ -2493,6 +2493,9 @@
       const putTxt = await putRes.text().catch(() => "");
       let putJson = {};
       try { putJson = putTxt ? JSON.parse(putTxt) : {}; } catch { putJson = { error: putTxt }; }
+      if ((putRes.status === 401 || putRes.status === 403) && retryAuth) {
+        return uploadBlobToStorage(blob, isVideo, false);
+      }
       if (!putRes.ok || !putJson.downloadTokens) {
         const em = typeof putJson.error === "string" ? putJson.error : (putJson.error?.message || putTxt || `HTTP ${putRes.status}`);
         throw new Error(`Upload lỗi (${putRes.status}): ${em}`);
