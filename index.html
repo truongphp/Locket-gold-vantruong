@@ -1456,6 +1456,7 @@
       boothMode: false,
       boothCapturing: false,
       activeFrame: null,
+      activeFrameCanvas: null,
       capturedBlob: null,
       capturedUrl: null,
       isVideo: false,
@@ -1860,12 +1861,12 @@
       out.width = size; out.height = size;
       const ctx = out.getContext("2d", { willReadFrequently: true });
       renderFrameToCanvas(video, ctx, size, true);
-      if (state.activeFrame?.url) {
+      if (state.activeFrameCanvas) {
+        ctx.drawImage(state.activeFrameCanvas, 0, 0, size, size);
+      } else if (state.activeFrame?.url) {
         try {
-          const img = new Image();
-          img.crossOrigin = "anonymous";
-          await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = state.activeFrame.url; });
-          ctx.drawImage(img, 0, 0, size, size);
+          const processed = await processFrameTransparency(state.activeFrame.url);
+          ctx.drawImage(processed, 0, 0, size, size);
         } catch {}
       }
       return new Promise((resolve) => out.toBlob((b) => resolve(b), "image/webp", 0.92));
@@ -1910,12 +1911,12 @@
         [[pad, pad], [pad + cell + gap, pad], [pad, pad + cell + gap], [pad + cell + gap, pad + cell + gap]].forEach(([cx, cy], idx) => {
           gctx.drawImage(shots[idx], cx, cy, cell, cell);
         });
-        if (state.activeFrame?.url) {
+        if (state.activeFrameCanvas) {
+          gctx.drawImage(state.activeFrameCanvas, 0, 0, 1080, 1080);
+        } else if (state.activeFrame?.url) {
           try {
-            const fimg = new Image();
-            fimg.crossOrigin = "anonymous";
-            await new Promise((res, rej) => { fimg.onload = res; fimg.onerror = rej; fimg.src = state.activeFrame.url; });
-            gctx.drawImage(fimg, 0, 0, 1080, 1080);
+            const processed = await processFrameTransparency(state.activeFrame.url);
+            gctx.drawImage(processed, 0, 0, 1080, 1080);
           } catch {}
         }
         const blob = await new Promise((resolve) => grid.toBlob((b) => resolve(b), "image/webp", 0.92));
@@ -2573,15 +2574,66 @@
       renderInlineCamCarousel();
     }
 
-    function applyActiveFrame(fr) {
+    async function processFrameTransparency(url) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      await new Promise((res, rej) => {
+        img.onload = res;
+        img.onerror = rej;
+        img.src = url;
+      });
+      const size = 1080;
+      const c = document.createElement("canvas");
+      c.width = size; c.height = size;
+      const ctx = c.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0, size, size);
+      const imgData = ctx.getImageData(0, 0, size, size);
+      const d = imgData.data;
+
+      // Check if frame already has transparent cutouts (> 4% transparent pixels)
+      let alphaCount = 0;
+      const step = 16;
+      const sampleTotal = Math.floor((size * size) / step);
+      for (let i = 3; i < d.length; i += 4 * step) {
+        if (d[i] < 240) alphaCount++;
+      }
+      if (alphaCount < sampleTotal * 0.04) {
+        // Punch out solid white / near-white photo slot boxes cleanly
+        for (let i = 0; i < d.length; i += 4) {
+          const r = d[i], g = d[i + 1], b = d[i + 2];
+          const minC = Math.min(r, g, b);
+          if (minC >= 242) {
+            d[i + 3] = 0;
+          } else if (minC >= 228) {
+            d[i + 3] = Math.round(((242 - minC) / 14) * 255);
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+      }
+      return c;
+    }
+
+    async function applyActiveFrame(fr) {
       state.activeFrame = fr;
+      state.activeFrameCanvas = null;
       const ov = $("camFrameOverlay");
-      if (fr && fr.url) {
-        ov.src = fr.url; ov.style.display = "block";
-        $("btnClearFrame").style.display = "inline-flex";
-      } else {
-        ov.style.display = "none"; ov.src = "";
+      if (!fr || !fr.url) {
+        ov.style.display = "none";
+        ov.src = "";
         $("btnClearFrame").style.display = "none";
+        return;
+      }
+      $("btnClearFrame").style.display = "inline-flex";
+      try {
+        const processed = await processFrameTransparency(fr.url);
+        if (state.activeFrame?.id !== fr.id) return;
+        state.activeFrameCanvas = processed;
+        ov.src = processed.toDataURL("image/png");
+        ov.style.display = "block";
+      } catch {
+        if (state.activeFrame?.id !== fr.id) return;
+        ov.src = fr.url;
+        ov.style.display = "block";
       }
     }
 
