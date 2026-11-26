@@ -641,18 +641,58 @@
     }
     .dock-btn {
       height: 44px;
-      padding: 0 18px;
+      padding: 0 13px;
       border-radius: 999px;
       border: none;
       background: transparent;
       color: var(--muted);
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       cursor: pointer;
+      white-space: nowrap;
       transition: all 0.15s ease;
+    }
+    .chat-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .chat-row:active { transform: scale(0.985); }
+    .chat-avt {
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1.5px solid rgba(255,255,255,0.14);
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: var(--gold);
+    }
+    .chat-avt img { width: 100%; height: 100%; object-fit: cover; }
+    .chat-unread {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: var(--gold);
+      color: #111;
+      font-size: 11px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .dock-btn.active {
       background: rgba(255, 255, 255, 0.16);
@@ -997,6 +1037,15 @@
         </div>
       </div>
 
+      <!-- PANEL 3B: CHAT INBOX (Firestore conversations) -->
+      <div id="panelChat" class="view-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:15px;font-weight:800;">💬 Hộp thư Locket</span>
+          <button id="btnReloadChat" class="btn-secondary" style="padding:6px 12px;font-size:12px;">🔄 Tải lại</button>
+        </div>
+        <div id="chatListContainer" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+
       <!-- PANEL 4: PROFILE / LOCKET GOLD (DA1A01BB) -->
       <div id="panelProfile" class="view-panel">
         <div class="card-box" style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">
@@ -1030,6 +1079,7 @@
       <button id="dockCal" class="dock-btn" data-tab="cal">📅 Lịch</button>
       <button id="dockCam" class="dock-btn cam-tab active" data-tab="cam">🏠 Cam</button>
       <button id="dockGrid" class="dock-btn" data-tab="grid">⊞ Lưới</button>
+      <button id="dockChat" class="dock-btn" data-tab="chat">💬 Chat</button>
     </div>
   </div>
 
@@ -1056,6 +1106,18 @@
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <span style="font-size:16px;font-weight:800;">💬 Chú thích Locket</span>
         <button id="btnCloseCaptionSheet" class="btn-primary" style="width:auto;padding:7px 16px;font-size:13px;">Áp dụng</button>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input id="musicLinkInput" class="field-input" style="flex:1;padding:9px 12px;font-size:13px;" placeholder="🎵 Dán link Spotify / Apple Music..." />
+        <button id="btnFetchMusic" class="btn-secondary" style="padding:9px 12px;font-size:12px;white-space:nowrap;">Lấy nhạc</button>
+      </div>
+      <div id="musicMetaPreview" style="display:none;align-items:center;gap:10px;background:#121215;border:1px solid rgba(29,185,84,0.45);border-radius:14px;padding:8px 10px;">
+        <img id="musicMetaCover" alt="cover" style="width:38px;height:38px;border-radius:8px;object-fit:cover;" />
+        <div style="flex:1;min-width:0;">
+          <div id="musicMetaTitle" style="font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+          <div id="musicMetaArtist" style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+        </div>
+        <button id="btnClearMusicMeta" class="btn-secondary" style="padding:4px 8px;font-size:11px;">✕</button>
       </div>
       <textarea id="capTextInput" class="field-input" rows="2" placeholder="Nhập chú thích (hỗ trợ xuống dòng)..."></textarea>
       <div style="display:flex;gap:8px;align-items:center;">
@@ -1094,6 +1156,22 @@
           <input id="viewerChatInput" class="field-input" placeholder="Gửi tin nhắn tới người đăng..." style="flex:1;" />
           <button id="btnSendViewerChat" class="btn-primary" style="width:auto;padding:0 16px;">Gửi</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET: CHAT CONVERSATION REPLY -->
+  <div id="chatReplySheet" class="sheet-backdrop">
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div id="chatReplyTitle" style="font-size:15px;font-weight:800;">Trò chuyện</div>
+        <button id="btnCloseChatReply" class="btn-secondary" style="padding:5px 12px;font-size:12px;">Đóng</button>
+      </div>
+      <div id="chatReplyBody" class="card-box" style="display:flex;flex-direction:column;gap:8px;font-size:13px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input id="chatReplyInput" class="field-input" placeholder="Nhập tin nhắn trả lời..." style="flex:1;" />
+        <button id="btnSendChatReply" class="btn-primary" style="width:auto;padding:0 18px;">Gửi</button>
       </div>
     </div>
   </div>
@@ -1180,8 +1258,11 @@
         icon: "",
         colors: [],
         textColor: "#FFFFFF",
+        musicMeta: null,
         extra: {}
       },
+      chatList: [],
+      activeChat: null,
       recoveryDate: "",
       gridMoments: [],
       gridPageToken: null,
@@ -1196,6 +1277,11 @@
     };
 
     const $ = (id) => document.getElementById(id);
+
+    function replaceFirebaseWithCDN(url) {
+      if (!url) return "";
+      return String(url).replace("https://firebasestorage.googleapis.com", "https://cdn.locketcamera.com");
+    }
 
     function showToast(msg, ms = 2600) {
       const box = $("toastBox");
@@ -1826,16 +1912,27 @@
       }
 
       if (pid === "gen_music") {
-        const t = txt || "Đang nghe nhạc chill";
+        const mm = state.caption.musicMeta;
+        const songTitle = mm?.song_title || txt || "Đang nghe nhạc chill";
+        const artistName = mm?.artist || "Locket Music";
+        const displayTxt = txt || (mm?.artist ? `${songTitle} • ${artistName}` : songTitle);
+        const iconObj = mm?.image_url
+          ? { type: "image", data: mm.image_url, source: "url" }
+          : { type: "sf_symbol", data: "music.note", color: "#1DB954" };
+        const payloadObj = { song_title: songTitle, artist: artistName };
+        if (mm?.spotify_url) payloadObj.spotify_url = mm.spotify_url;
+        if (mm?.apple_music_url) payloadObj.apple_music_url = mm.apple_music_url;
+        if (mm?.preview_url) payloadObj.preview_url = mm.preview_url;
+        if (mm?.isrc) payloadObj.isrc = mm.isrc;
         return {
           overlay_type: "caption",
           overlay_id: "caption:music",
-          alt_text: t,
+          alt_text: displayTxt,
           data: {
-            text: t, text_color: "#FFFFFFE6", type: "music", max_lines: maxLines,
+            text: displayTxt, text_color: "#FFFFFFE6", type: "music", max_lines: maxLines,
             background: { material_blur: "ultra_thin", colors: ["#5E434D3D", "#5E434D3D"] },
-            icon: { type: "sf_symbol", data: "music.note", color: "#1DB954" },
-            payload: { song_title: t, artist: "Locket Music" }
+            icon: iconObj,
+            payload: payloadObj
           }
         };
       }
@@ -2076,7 +2173,7 @@
         return;
       }
       box.innerHTML = state.gridMoments.map((m, idx) => {
-        const thumb = m.thumbnail_url || m.image_url || "";
+        const thumb = replaceFirebaseWithCDN(m.thumbnail_url || m.image_url || "");
         const cap = (m.overlays || []).find((o) => o?.data?.text)?.data?.text || m.caption || "";
         const vidBadge = m.video_url ? `<span class="grid-badge">🎬</span>` : "";
         const capMini = cap ? `<div class="grid-cap-mini">${cap}</div>` : "";
@@ -2101,7 +2198,7 @@
       const uid = m.user || "";
       const f = state.friendMap[uid];
       $("viewerAuthor").textContent = uid === state.session.uid ? "Bạn" : (f?.name || uid.slice(0, 8));
-      $("viewerImg").src = m.thumbnail_url || m.image_url || "";
+      $("viewerImg").src = replaceFirebaseWithCDN(m.thumbnail_url || m.image_url || "");
       const cap = (m.overlays || []).find((o) => o?.data?.text)?.data?.text || m.caption || "";
       if (cap) {
         $("viewerCapBadge").style.display = "inline-flex";
@@ -2197,7 +2294,7 @@
         const list = byDay[d] || [];
         const iso = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
         if (list.length) {
-          const thumb = list[0].thumbnail_url || list[0].image_url || "";
+          const thumb = replaceFirebaseWithCDN(list[0].thumbnail_url || list[0].image_url || "");
           const badge = list.length > 1 ? `<span class="cal-count">${list.length}</span>` : "";
           html += `<div class="cal-cell" data-day="${d}" data-iso="${iso}"><img src="${thumb}" loading="lazy" alt="${d}" />${badge}</div>`;
         } else {
@@ -2317,6 +2414,158 @@
       });
     }
 
+    // =========================================================================
+    // CHAT INBOX (Firestore users/{uid}/conversations)
+    // =========================================================================
+    function normalizeConversationDoc(doc, myUid) {
+      if (!doc || !doc.fields) return null;
+      const f = doc.fields;
+      const members = (f.members?.arrayValue?.values || []).map((v) => v.stringValue).filter(Boolean);
+      const withUser = members.find((id) => id !== myUid) || members[0] || "";
+      const latest = f.latest_message?.mapValue?.fields || null;
+      const toSec = (ts) => (ts ? Math.floor(new Date(ts).getTime() / 1000) : 0);
+      return {
+        uid: f.uid?.stringValue || (doc.name || "").split("/").pop(),
+        withUser,
+        unreadCount: parseInt(f.unread_count?.integerValue || "0", 10) || 0,
+        isRead: Boolean(f.is_read?.booleanValue),
+        lastUpdated: toSec(f.last_updated?.timestampValue),
+        otherLastReadAt: toSec(f.other_last_read_at?.timestampValue),
+        latestMessage: latest ? {
+          body: latest.body?.stringValue || "",
+          sender: latest.sender?.stringValue || "",
+          createdAt: toSec(latest.created_at?.timestampValue),
+          replyMoment: latest.reply_moment?.stringValue || null,
+          thumbnailUrl: replaceFirebaseWithCDN(latest.thumbnail_url?.stringValue || "")
+        } : null
+      };
+    }
+
+    function formatRelTime(sec) {
+      if (!sec) return "";
+      const diff = Math.max(0, Math.floor(Date.now() / 1000) - sec);
+      if (diff < 60) return "Vừa xong";
+      if (diff < 3600) return `${Math.floor(diff / 60)}ph`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}g`;
+      return `${Math.floor(diff / 86400)}ng`;
+    }
+
+    async function loadChatInbox() {
+      const box = $("chatListContainer");
+      box.innerHTML = `<div style="text-align:center;color:var(--muted);padding:26px;">Đang tải hộp thư Locket...</div>`;
+      try {
+        const token = await ensureValidToken();
+        const url = `${WORKER_URL}/firestore/users/${state.session.uid}/conversations?pageSize=20&orderBy=${encodeURIComponent("last_updated desc")}`;
+        const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error?.message || json.error || "Không tải được hộp thư");
+        const docs = json.documents || [];
+        state.chatList = docs.map((d) => normalizeConversationDoc(d, state.session.uid)).filter(Boolean);
+        renderChatInbox();
+      } catch (err) {
+        box.innerHTML = `<div style="text-align:center;color:var(--danger);padding:20px;">${err.message}</div>`;
+      }
+    }
+
+    function renderChatInbox() {
+      const box = $("chatListContainer");
+      if (!state.chatList.length) {
+        box.innerHTML = `<div style="text-align:center;color:var(--muted);padding:26px;">Chưa có cuộc trò chuyện nào.</div>`;
+        return;
+      }
+      box.innerHTML = state.chatList.map((c, idx) => {
+        const f = state.friendMap[c.withUser];
+        const name = f?.name || (c.withUser ? c.withUser.slice(0, 8) : "Bạn bè");
+        const avt = f?.avatar
+          ? `<img src="${replaceFirebaseWithCDN(f.avatar)}" alt="${name}" />`
+          : `<span>${name.slice(0, 1).toUpperCase()}</span>`;
+        const lm = c.latestMessage;
+        const prefix = lm?.sender === state.session.uid ? "Bạn: " : "";
+        const seenTag = (lm?.sender === state.session.uid && c.otherLastReadAt >= (lm?.createdAt || 0) && lm?.createdAt) ? " • ✓ Đã xem" : "";
+        const bodyTxt = lm ? `${prefix}${lm.body || (lm.thumbnailUrl ? "[Ảnh/Phản hồi]" : "...")}` : "Chưa có tin nhắn";
+        const unreadHtml = c.unreadCount > 0 ? `<span class="chat-unread">${c.unreadCount}</span>` : "";
+        return `<div class="chat-row" data-cidx="${idx}">
+          <div class="chat-avt">${avt}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+              <span style="font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</span>
+              <span style="font-size:11px;color:var(--muted);flex-shrink:0;">${formatRelTime(lm?.createdAt || c.lastUpdated)}</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">${bodyTxt}${seenTag}</div>
+          </div>
+          ${unreadHtml}
+        </div>`;
+      }).join("");
+
+      box.querySelectorAll(".chat-row").forEach((row) => {
+        row.addEventListener("click", () => {
+          const c = state.chatList[parseInt(row.dataset.cidx, 10)];
+          if (c) openChatReplySheet(c);
+        });
+      });
+    }
+
+    function openChatReplySheet(c) {
+      state.activeChat = c;
+      const f = state.friendMap[c.withUser];
+      const name = f?.name || c.withUser.slice(0, 8);
+      $("chatReplyTitle").textContent = `💬 ${name}`;
+      const lm = c.latestMessage;
+      const thumbHtml = lm?.thumbnailUrl
+        ? `<img src="${lm.thumbnailUrl}" alt="thumb" style="width:72px;height:72px;border-radius:12px;object-fit:cover;" />`
+        : "";
+      const who = lm?.sender === state.session.uid ? "Bạn" : name;
+      $("chatReplyBody").innerHTML = `
+        <div style="display:flex;gap:10px;align-items:center;">
+          ${thumbHtml}
+          <div style="flex:1;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Tin nhắn gần nhất (${who} • ${formatRelTime(lm?.createdAt || c.lastUpdated)})</div>
+            <div style="font-size:14px;font-weight:600;color:#fff;word-break:break-word;">${lm?.body || "(Không có nội dung chữ)"}</div>
+          </div>
+        </div>`;
+      $("chatReplyInput").value = "";
+      $("chatReplySheet").classList.add("open");
+    }
+
+    async function fetchMusicMetadataFromWorker() {
+      const link = $("musicLinkInput").value.trim();
+      if (!link) return showToast("Dán link Spotify hoặc Apple Music trước nhé!");
+      const btn = $("btnFetchMusic");
+      btn.disabled = true;
+      btn.textContent = "Đang lấy...";
+      try {
+        const res = await fetch(`${WORKER_URL}/music/metadata`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: link })
+        });
+        const json = await res.json();
+        if (!res.ok || !json.data) throw new Error(json.error || "Không kéo được thông tin nhạc");
+        const mm = json.data;
+        state.caption.musicMeta = mm;
+        state.caption.presetId = "gen_music";
+        state.caption.colors = [];
+        state.caption.textColor = "#FFFFFF";
+        const displayTxt = mm.artist ? `${mm.song_title} • ${mm.artist}` : mm.song_title;
+        $("capTextInput").value = displayTxt;
+        $("musicMetaTitle").textContent = mm.song_title || "";
+        $("musicMetaArtist").textContent = `${mm.artist || ""} ${mm.isrc ? `• ISRC: ${mm.isrc}` : ""}`;
+        if (mm.image_url) {
+          $("musicMetaCover").src = mm.image_url;
+          $("musicMetaCover").style.display = "block";
+        } else {
+          $("musicMetaCover").style.display = "none";
+        }
+        $("musicMetaPreview").style.display = "flex";
+        showToast(`🎵 Đã kéo xong: ${mm.song_title}`);
+      } catch (err) {
+        showToast(`Lỗi kéo nhạc: ${err.message}`, 3500);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Lấy nhạc";
+      }
+    }
+
     function switchTab(tabName) {
       document.querySelectorAll(".view-panel").forEach((p) => p.classList.remove("active"));
       document.querySelectorAll(".dock-btn").forEach((b) => b.classList.remove("active"));
@@ -2331,6 +2580,10 @@
         $("panelCal").classList.add("active");
         $("dockCal").classList.add("active");
         if (!state.calMoments.length) loadCalendarData();
+      } else if (tabName === "chat") {
+        $("panelChat").classList.add("active");
+        $("dockChat").classList.add("active");
+        if (!state.chatList.length) loadChatInbox();
       } else if (tabName === "profile") {
         $("panelProfile").classList.add("active");
       }
@@ -2540,6 +2793,41 @@
         state.session = null;
         stopCamera();
         $("loginScreen").classList.add("active");
+      });
+
+      // Chat Inbox & Reply Sheet
+      $("btnReloadChat").addEventListener("click", loadChatInbox);
+      $("btnCloseChatReply").addEventListener("click", () => $("chatReplySheet").classList.remove("open"));
+      $("btnSendChatReply").addEventListener("click", async () => {
+        const msg = $("chatReplyInput").value.trim();
+        const c = state.activeChat;
+        if (!msg || !c?.withUser) return;
+        $("btnSendChatReply").disabled = true;
+        try {
+          await callRpc("sendChatMessageV2", {
+            receiver_uid: c.withUser,
+            client_token: crypto.randomUUID(),
+            msg,
+            moment_uid: null,
+            from_memory: false
+          });
+          $("chatReplyInput").value = "";
+          $("chatReplySheet").classList.remove("open");
+          showToast("Đã gửi tin nhắn! 💬");
+          loadChatInbox();
+        } catch (err) {
+          showToast(`Lỗi gửi chat: ${err.message}`);
+        } finally {
+          $("btnSendChatReply").disabled = false;
+        }
+      });
+
+      // Auto Music Metadata Fetch
+      $("btnFetchMusic").addEventListener("click", fetchMusicMetadataFromWorker);
+      $("btnClearMusicMeta").addEventListener("click", () => {
+        state.caption.musicMeta = null;
+        $("musicMetaPreview").style.display = "none";
+        $("musicLinkInput").value = "";
       });
 
       // Backdrop tap close
